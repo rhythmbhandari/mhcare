@@ -1,20 +1,24 @@
-import 'dart:developer';
+import 'package:david/widgets/buttonwidget.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../services/staffService.dart';
+import '../../widgets/customtextfield.dart';
 
 class AddDiagnosisScreen extends StatefulWidget {
   final String patientNumber;
 
-  AddDiagnosisScreen({required this.patientNumber});
+  const AddDiagnosisScreen({required this.patientNumber, Key? key})
+      : super(key: key);
 
   @override
-  _AddDiagnosisScreenState createState() => _AddDiagnosisScreenState();
+  AddDiagnosisScreenState createState() => AddDiagnosisScreenState();
 }
 
-class _AddDiagnosisScreenState extends State<AddDiagnosisScreen> {
+class AddDiagnosisScreenState extends State<AddDiagnosisScreen> {
   final _diagnosisController = TextEditingController();
+  final _descriptionController = TextEditingController();
   String? _selectedDoctorId;
   List<Map<String, dynamic>> _doctors = [];
+  final StaffService _diagnosisService = StaffService();
 
   @override
   void initState() {
@@ -24,108 +28,129 @@ class _AddDiagnosisScreenState extends State<AddDiagnosisScreen> {
 
   Future<void> _fetchDoctors() async {
     try {
-      final response = await Supabase.instance.client
-          .from('users') // Adjust table name as necessary
-          .select('id_number, name')
-          .eq('role', 'doctor');
-
-      if (response != null) {
-        setState(() {
-          _doctors = List<Map<String, dynamic>>.from(response as List);
-          // Set initial value if the list is not empty
-          if (_doctors.isNotEmpty) {
-            _selectedDoctorId = _doctors[0]['id'];
-          } else {
-            _selectedDoctorId = null; // No doctors available
-          }
-        });
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error fetching doctors: ${response}'),
-          backgroundColor: Colors.red,
-        ));
-      }
+      final doctors = await _diagnosisService.fetchDoctors();
+      setState(() {
+        _doctors = doctors;
+        _selectedDoctorId =
+            _doctors.isNotEmpty ? _doctors[0]['id_number'] : null;
+      });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Error: ${e.toString()}'),
-        backgroundColor: Colors.red,
-      ));
+      _showErrorSnackBar(e.toString());
     }
   }
 
   Future<void> _addDiagnosis() async {
     final diagnosis = _diagnosisController.text.trim();
+    final description = _descriptionController.text.trim();
 
     if (_selectedDoctorId == null || diagnosis.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Please fill out all fields'),
-        backgroundColor: Colors.red,
-      ));
+      _showErrorSnackBar('Please fill out all fields');
       return;
     }
 
     try {
-      await Supabase.instance.client.from('diagnoses').insert({
-        'patient_number': widget.patientNumber,
-        'doctor_number': _selectedDoctorId,
-        'diagnosis': diagnosis,
-        'diagnosis_date':
-            DateTime.now().toUtc().toIso8601String(), // Set current timestamp
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Diagnosis added successfully'),
-        backgroundColor: Colors.green,
-      ));
-      Navigator.pop(context); // Go back to the previous screen
+      await _diagnosisService.addDiagnosis(
+        patientNumber: widget.patientNumber,
+        doctorNumber: _selectedDoctorId!,
+        diagnosis: diagnosis,
+        description: description,
+      );
+      _showSuccessSnackBar('Diagnosis added successfully');
+      Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Error: ${e.toString()}'),
-        backgroundColor: Colors.red,
-      ));
+      _showErrorSnackBar(e.toString());
     }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.red,
+    ));
+  }
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.green,
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Diagnosis'),
-        foregroundColor: Colors.white,
-        backgroundColor: Colors.teal,
+        title: const Text('Add Diagnosis'),
+        foregroundColor: Colors.black,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            DropdownButtonFormField<String>(
-              value: _selectedDoctorId,
-              decoration: InputDecoration(labelText: 'Select Doctor'),
-              items: _doctors.map((doctor) {
-                return DropdownMenuItem<String>(
-                  value: doctor['id_number'] as String,
-                  child: Text(doctor['name'] as String),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedDoctorId = value;
-                });
-              },
-              validator: (value) =>
-                  value == null ? 'Please select a doctor' : null,
+            Container(
+              padding: const EdgeInsets.only(left: 16.0),
+              decoration: BoxDecoration(
+                color: Colors.white54,
+                borderRadius: BorderRadius.circular(16.0),
+                border: Border.all(
+                  color: Colors.grey,
+                  width: 1,
+                ),
+              ),
+              child: DropdownButton<String>(
+                value: _selectedDoctorId,
+                hint: const Text('Select Doctor'),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedDoctorId = newValue;
+                  });
+                },
+                isExpanded: true,
+                underline: const SizedBox(),
+                items: _doctors.map((doctor) {
+                  return DropdownMenuItem<String>(
+                    value: doctor['id_number'] as String,
+                    child: Text(
+                      doctor['name'] as String,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge
+                          ?.copyWith(color: Colors.black87),
+                    ),
+                  );
+                }).toList(),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge
+                    ?.copyWith(color: Colors.black87),
+                dropdownColor: Colors.white,
+              ),
             ),
-            TextFormField(
-              controller: _diagnosisController,
-              decoration: InputDecoration(labelText: 'Diagnosis'),
-              maxLines: 3,
+            SizedBox(height: 18),
+            CustomTextFormField(
+              labelText: 'Diagnosis',
+              textController: _diagnosisController,
+              onChanged: (_) {},
+              readOnly: false,
+              textInputType: TextInputType.name,
+              inputFormatters: [],
+              color: Colors.white54,
+              obscureText: false,
             ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _addDiagnosis,
-              child: Text('Add Diagnosis'),
+            SizedBox(height: 18),
+            CustomTextFormField(
+              labelText: 'Description',
+              textController: _descriptionController,
+              onChanged: (_) {},
+              readOnly: false,
+              textInputType: TextInputType.name,
+              inputFormatters: [],
+              color: Colors.white54,
+              obscureText: false,
             ),
+            const SizedBox(height: 32),
+            ButtonsWidget(onPressed: _addDiagnosis, name: 'Add Diagnosis'),
           ],
         ),
       ),

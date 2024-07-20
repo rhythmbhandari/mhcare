@@ -1,28 +1,34 @@
+import 'package:david/services/staffService.dart';
+import 'package:david/widgets/buttonwidget.dart';
+import 'package:david/widgets/customtextfield.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:bcrypt/bcrypt.dart';
 
 class PatientDetailScreen extends StatefulWidget {
   final Map<String, dynamic> patient;
 
-  PatientDetailScreen({required this.patient});
+  const PatientDetailScreen({super.key, required this.patient});
 
   @override
-  _PatientDetailScreenState createState() => _PatientDetailScreenState();
+  PatientDetailScreenState createState() => PatientDetailScreenState();
 }
 
-class _PatientDetailScreenState extends State<PatientDetailScreen> {
+class PatientDetailScreenState extends State<PatientDetailScreen> {
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
   final _dobController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   DateTime? _selectedDate;
+  final StaffService _patientService = StaffService();
 
   @override
   void initState() {
     super.initState();
+    _initializeFields();
+  }
+
+  void _initializeFields() {
     _nameController.text = widget.patient['user_name'] ?? '';
     _addressController.text = widget.patient['address'] ?? '';
     _dobController.text = widget.patient['date_of_birth']?.toString() ?? '';
@@ -64,28 +70,19 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
     final updatedPassword = _passwordController.text.trim();
 
     try {
-      final patientUpdates = {
-        'address': updatedAddress,
-        'date_of_birth': updatedDob,
-      };
+      await _patientService.updatePatient(
+        patientNumber: widget.patient['patient_number'],
+        address: updatedAddress,
+        dateOfBirth: updatedDob,
+      );
 
-      await Supabase.instance.client
-          .from('patients')
-          .update(patientUpdates)
-          .eq('patient_number', widget.patient['patient_number']);
+      await _patientService.updateUser(
+        idNumber: widget.patient['patient_number'],
+        name: updatedName,
+        password: updatedPassword.isNotEmpty ? updatedPassword : null,
+      );
 
-      final userUpdates = {
-        'name': updatedName,
-        if (updatedPassword.isNotEmpty)
-          'password_hash': BCrypt.hashpw(updatedPassword, BCrypt.gensalt()),
-      };
-
-      await Supabase.instance.client
-          .from('users')
-          .update(userUpdates)
-          .eq('id_number', widget.patient['patient_number']);
-
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Patient details updated successfully'),
         backgroundColor: Colors.green,
       ));
@@ -107,53 +104,76 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Patient Details'),
-        foregroundColor: Colors.white,
-        backgroundColor: Colors.teal,
+        title: const Text('Patient Details'),
+        foregroundColor: Colors.black,
+        automaticallyImplyLeading: true,
+        centerTitle: false,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextFormField(
+            _buildTextField(
               controller: _nameController,
-              decoration: InputDecoration(labelText: 'Name'),
+              label: 'Name',
             ),
-            SizedBox(height: 10),
-            TextFormField(
+            const SizedBox(height: 10),
+            _buildTextField(
               controller: _addressController,
-              decoration: InputDecoration(labelText: 'Address'),
+              label: 'Address',
             ),
-            SizedBox(height: 10),
-            TextFormField(
-              controller: _dobController,
-              decoration: InputDecoration(labelText: 'Date of Birth'),
-              readOnly: true,
-              onTap: () => _selectDate(context),
-            ),
-            SizedBox(height: 10),
-            TextFormField(
+            const SizedBox(height: 10),
+            _buildDateOfBirthField(),
+            const SizedBox(height: 10),
+            _buildTextField(
               controller: _passwordController,
-              decoration: InputDecoration(labelText: 'New Password'),
+              label: 'New Password',
               obscureText: true,
             ),
-            SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _updatePatientDetails,
-                    child: _isLoading
-                        ? CircularProgressIndicator()
-                        : Text('Update Details'),
-                  ),
-                )
-              ],
-            )
+            const SizedBox(height: 20),
+            _buildUpdateButton(),
           ],
         ),
       ),
+    );
+  }
+
+  CustomTextFormField _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    bool obscureText = false,
+  }) {
+    return CustomTextFormField(
+      labelText: label,
+      obscureText: obscureText,
+      textInputType: TextInputType.text,
+      textController: controller,
+      inputFormatters: [],
+      onChanged: (String) {},
+    );
+  }
+
+  Widget _buildDateOfBirthField() {
+    return GestureDetector(
+      onTap: () => _selectDate(context),
+      child: CustomTextFormField(
+        labelText: 'Date of Birth',
+        obscureText: false,
+        textInputType: TextInputType.text,
+        textController: _dobController,
+        inputFormatters: [],
+        enabled: false,
+        onChanged: (String) {},
+      ),
+    );
+  }
+
+  Widget _buildUpdateButton() {
+    return ButtonsWidget(
+      name: "Update Details",
+      onPressed: _updatePatientDetails,
+      isLoading: _isLoading,
     );
   }
 }

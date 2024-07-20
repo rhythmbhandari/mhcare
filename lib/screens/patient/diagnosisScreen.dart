@@ -31,8 +31,9 @@ class DiagnosisScreenState extends State<DiagnosisScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Diagnoses'),
-        backgroundColor: Colors.blueGrey[800],
-        foregroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        automaticallyImplyLeading: true,
+        centerTitle: false,
       ),
       body: RefreshIndicator(
         onRefresh: _refreshDiagnoses,

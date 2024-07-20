@@ -1,4 +1,6 @@
 // ignore: file_names
+import 'dart:developer';
+
 import 'package:bcrypt/bcrypt.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -8,7 +10,7 @@ import 'databaseService.dart';
 class AuthService {
   final _supabase = Supabase.instance.client;
 
-  Future<void> register({
+  Future<String?> register({
     required String name,
     required String password,
     required String role,
@@ -16,14 +18,20 @@ class AuthService {
     final hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
     try {
-      await _supabase.from('users').insert({
+      final response = await _supabase.from('users').insert({
         'password_hash': hashedPassword,
         'name': name,
         'role': role.toLowerCase(),
-      });
+      }).select();
+      if (response.isNotEmpty) {
+        final idNumber = response[0]['id_number'];
+        print(idNumber);
+        return idNumber;
+      }
     } catch (e) {
       throw Exception('Registration failed: ${e.toString()}');
     }
+    return null;
   }
 
   Future<UserModel?> login(

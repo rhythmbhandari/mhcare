@@ -20,8 +20,18 @@ class PersonalInformationScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
-        foregroundColor: Colors.white,
-        backgroundColor: Colors.blueGrey[800],
+        foregroundColor: Colors.black,
+        automaticallyImplyLeading: true,
+        centerTitle: false,
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.logout,
+              color: Colors.red,
+            ),
+            onPressed: () => _handleLogout(context),
+          ),
+        ],
       ),
       body: FutureBuilder<PatientModel?>(
         future: userService.fetchUser(),
@@ -42,18 +52,23 @@ class PersonalInformationScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Colors.blueGrey[200],
-                      child: Text(
-                        avatarText.toUpperCase(),
-                        style: TextStyle(
-                          color: Colors.blueGrey[800],
-                          fontSize: 36,
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.blueGrey[800],
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Center(
+                        child: Text(
+                          avatarText,
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 36),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 8),
                     Text(
                       user.idNumber,
                       style: TextStyle(
@@ -95,17 +110,6 @@ class PersonalInformationScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: () => _handleLogout(context),
-                      child: const Text('Logout'),
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 32, vertical: 12),
-                      ),
-                    ),
                   ],
                 ),
               ),

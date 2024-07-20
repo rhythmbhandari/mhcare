@@ -1,22 +1,20 @@
 import 'package:flutter/material.dart';
-
-import 'addDiagnosisScreen.dart';
 import 'addPatientScreen.dart';
 import 'patientListScreen.dart';
 import 'profileScreen.dart';
 
 class SharedHomeScreen extends StatefulWidget {
   @override
-  _SharedHomeScreenState createState() => _SharedHomeScreenState();
+  SharedHomeScreenState createState() => SharedHomeScreenState();
 }
 
-class _SharedHomeScreenState extends State<SharedHomeScreen> {
+class SharedHomeScreenState extends State<SharedHomeScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    PatientListScreen(),
+    const PatientListScreen(),
     AddPatientScreen(),
-    UserInfoScreen(),
+    const UserInfoScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -30,7 +28,6 @@ class _SharedHomeScreenState extends State<SharedHomeScreen> {
     return Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.teal,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.list),
@@ -45,10 +42,13 @@ class _SharedHomeScreenState extends State<SharedHomeScreen> {
             label: 'User Info',
           ),
         ],
-        showUnselectedLabels: false,
         currentIndex: _currentIndex,
-        unselectedItemColor: Colors.grey.shade400,
-        selectedItemColor: Colors.white,
+        selectedItemColor: Colors.blueGrey[800],
+        unselectedItemColor: Colors.blueGrey[400],
+        showUnselectedLabels: false,
+        backgroundColor: Colors.white,
+        elevation: 8,
+        type: BottomNavigationBarType.fixed,
         onTap: _onItemTapped,
       ),
     );

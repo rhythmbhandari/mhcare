@@ -15,7 +15,6 @@ class Message {
     required this.sentAt,
   });
 
-  // Convert a Message instance to a Map
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -27,7 +26,6 @@ class Message {
     };
   }
 
-  // Create a Message instance from a Map
   factory Message.fromMap(Map<String, dynamic> map) {
     return Message(
       id: map['id'],

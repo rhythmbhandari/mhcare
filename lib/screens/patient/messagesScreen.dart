@@ -33,8 +33,9 @@ class MessagesScreenState extends State<MessagesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Messages'),
-        backgroundColor: Colors.blueGrey[800],
-        foregroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        automaticallyImplyLeading: true,
+        centerTitle: false,
       ),
       body: RefreshIndicator(
         onRefresh: _refreshConversations,

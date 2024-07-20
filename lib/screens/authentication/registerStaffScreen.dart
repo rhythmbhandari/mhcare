@@ -45,16 +45,25 @@ class RegistrationPageState extends State<RegistrationPage> {
     }
 
     try {
-      await _authService.register(
+      final response = await _authService.register(
         name: name,
         password: password,
         role: _selectedRole,
       );
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Registration successful!'),
-        backgroundColor: Colors.green,
-      ));
-      Navigator.pop(context);
+      if (response != null) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Registration successful!'),
+          backgroundColor: Colors.green,
+        ));
+        await _authService.login(idNumber: response, password: password);
+        Navigator.pop(context);
+        Navigator.pushReplacementNamed(context, '/shared_home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Registration failed'),
+          backgroundColor: Colors.red,
+        ));
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(e.toString()),

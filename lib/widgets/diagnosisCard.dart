@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/diagnosis.dart';
+import 'conversationTile.dart';
 
 class DiagnosisCard extends StatelessWidget {
   final Diagnosis diagnosis;
@@ -24,15 +25,22 @@ class DiagnosisCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 30,
-            backgroundColor: Colors.blueGrey[100],
-            child: Text(
-              diagnosis.doctorName.isNotEmpty ? diagnosis.doctorName[0] : 'D',
-              style: TextStyle(
-                color: Colors.blueGrey[800],
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: getRandomColor(),
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Text(
+                diagnosis.doctorName.isNotEmpty ? diagnosis.doctorName[0] : 'D',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),

@@ -9,17 +9,17 @@ class PatientHomeScreen extends StatefulWidget {
   const PatientHomeScreen({super.key});
 
   @override
-  _PatientHomeScreenState createState() => _PatientHomeScreenState();
+  PatientHomeScreenState createState() => PatientHomeScreenState();
 }
 
-class _PatientHomeScreenState extends State<PatientHomeScreen> {
+class PatientHomeScreenState extends State<PatientHomeScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    DiagnosisScreen(),
-    MessagesScreen(), // Placeholder
-    HeartRateScreen(),
-    PersonalInformationScreen(),
+    const DiagnosisScreen(),
+    const MessagesScreen(),
+    const HeartRateScreen(),
+    const PersonalInformationScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -52,13 +52,12 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blueGrey[800], // Updated color
-        unselectedItemColor: Colors.blueGrey[400], // Updated color
+        selectedItemColor: Colors.blueGrey[800],
+        unselectedItemColor: Colors.blueGrey[400],
         showUnselectedLabels: false,
-        backgroundColor: Colors.white, // Updated color for background
-        elevation: 8, // Slight elevation for shadow effect
-        type: BottomNavigationBarType
-            .fixed, // Fixed type for consistent icon size
+        backgroundColor: Colors.white,
+        elevation: 8,
+        type: BottomNavigationBarType.fixed,
         onTap: _onItemTapped,
       ),
     );

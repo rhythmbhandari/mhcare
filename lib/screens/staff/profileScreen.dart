@@ -1,97 +1,98 @@
 import 'package:flutter/material.dart';
 import '../../models/user.dart';
-import '../../services/databaseService.dart';
 import '../../services/authService.dart';
-import '../../utils/string_utils.dart'; // Assuming you have an auth service for logout
+import '../../services/databaseService.dart';
+import '../../utils/string_utils.dart';
 
 class UserInfoScreen extends StatelessWidget {
+  const UserInfoScreen({super.key});
+
   Future<UserModel?> _fetchUser() async {
     return await SharedPreferenceService().getUser();
   }
 
   Future<void> _logout(BuildContext context) async {
-    await AuthService()
-        .logout(); // Assuming you have a logout method in AuthService
-    Navigator.of(context)
-        .popAndPushNamed('/'); // Navigate to login screen after logout
+    await AuthService().logout();
+    Navigator.of(context).popAndPushNamed('/');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
-        foregroundColor: Colors.white,
-        backgroundColor: Colors.teal,
+        title: const Text('Profile'),
+        foregroundColor: Colors.black,
+        automaticallyImplyLeading: true,
+        centerTitle: false,
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.logout,
+              color: Colors.red,
+            ),
+            onPressed: () => _logout(context),
+          ),
+        ],
       ),
       body: FutureBuilder<UserModel?>(
         future: _fetchUser(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data == null) {
-            return Center(child: Text('No user data available'));
+            return const Center(child: Text('No user data available'));
           } else {
             final user = snapshot.data!;
-            final userName = user.idNumber;
-            final avatarText = user.name.isNotEmpty ? user.name[0] : 'U';
+            final avatarText =
+                user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U';
 
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Colors.teal,
-                      child: Text(
-                        avatarText.toUpperCase(),
-                        style: TextStyle(color: Colors.white, fontSize: 36),
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.teal,
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Center(
+                        child: Text(
+                          avatarText,
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 36),
+                        ),
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
-                      userName,
-                      style: TextStyle(
+                      user.idNumber,
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 24,
-                        color: Colors.teal,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
-                      user.name ?? 'No name',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.teal[700],
+                      user.name,
+                      style: const TextStyle(
+                        fontSize: 18,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       'Role: ${capitalizeFirstLetter(user.role)}',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.teal[700],
+                      style: const TextStyle(
+                        fontSize: 14,
                       ),
                     ),
-                    SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: () => _logout(context),
-                      child: Text('Logout'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal, // Background color
-                        foregroundColor: Colors.white, // Text color
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                      ),
-                    ),
+                    const Expanded(child: SizedBox(height: 24)),
                   ],
                 ),
               ),

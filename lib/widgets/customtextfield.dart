@@ -7,6 +7,7 @@ class CustomTextFormField extends StatefulWidget {
     this.readOnly = false,
     this.enabled = true,
     this.obscureText = false,
+    this.color = Colors.white,
     required this.textInputType,
     required this.labelText,
     required this.inputFormatters,
@@ -17,6 +18,7 @@ class CustomTextFormField extends StatefulWidget {
 
   final String labelText;
   final bool readOnly;
+  final Color color;
   final bool obscureText;
   final TextInputType textInputType;
   final bool enabled;
@@ -51,7 +53,7 @@ class CustomTextFormFieldState extends State<CustomTextFormField> {
         left: 0.015 * MediaQuery.of(context).size.height,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: widget.color,
         borderRadius: BorderRadius.circular(16.0),
         border: Border.all(
           color: widget.errorBool ? Colors.red : Colors.grey,

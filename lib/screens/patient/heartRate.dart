@@ -1,3 +1,4 @@
+import 'package:david/widgets/buttonwidget.dart';
 import 'package:flutter/material.dart';
 import 'package:heart_bpm/chart.dart';
 import 'package:heart_bpm/heart_bpm.dart';
@@ -9,10 +10,10 @@ class HeartRateScreen extends StatefulWidget {
   const HeartRateScreen({super.key});
 
   @override
-  HeartRateScreenState createState() => HeartRateScreenState();
+  _HeartRateScreenState createState() => _HeartRateScreenState();
 }
 
-class HeartRateScreenState extends State<HeartRateScreen> {
+class _HeartRateScreenState extends State<HeartRateScreen> {
   final List<SensorValue> _sensorData = [];
   final List<SensorValue> _bpmData = [];
   bool _isMeasurementActive = false;
@@ -55,7 +56,7 @@ class HeartRateScreenState extends State<HeartRateScreen> {
     return _bpmData.map((e) => e.value).reduce((a, b) => a < b ? a : b);
   }
 
-  Future<void> _uploadData() async {
+  void _uploadData() async {
     final averageBPM = _calculateAverageBPM();
     final maxBPM = _calculateMaxBPM();
     final minBPM = _calculateMinBPM();
@@ -102,7 +103,7 @@ class HeartRateScreenState extends State<HeartRateScreen> {
     }
   }
 
-  void _goToHistoryScreen() {
+  void _goToHistoryScreen() async {
     Navigator.pushNamed(context, '/measurement_history');
   }
 
@@ -114,14 +115,11 @@ class HeartRateScreenState extends State<HeartRateScreen> {
     final minBPM = _calculateMinBPM();
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        backgroundColor: Colors.blueGrey[800],
-        foregroundColor: Colors.white,
-        title: const Text(
-          'Heart Rate',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Heart Rate'),
+        foregroundColor: Colors.black,
+        automaticallyImplyLeading: true,
+        centerTitle: false,
         elevation: 0,
         actions: [
           IconButton(
@@ -135,24 +133,51 @@ class HeartRateScreenState extends State<HeartRateScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (_isMeasurementActive)
-              Expanded(
-                child: HeartBPMDialog(
-                  context: context,
-                  showTextValues: true,
-                  borderRadius: 12,
-                  onRawData: _handleRawData,
-                  onBPM: _handleBPM,
+            Row(
+              children: [
+                _isMeasurementActive
+                    ? Expanded(
+                        child: HeartBPMDialog(
+                          context: context,
+                          showTextValues: false,
+                          borderRadius: 12,
+                          onRawData: _handleRawData,
+                          onBPM: _handleBPM,
+                        ),
+                      )
+                    : Container(),
+                Expanded(
+                  child: latestBPM != null
+                      ? Padding(
+                          padding: const EdgeInsets.only(top: 16.0),
+                          child: Card(
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.all(16),
+                              title: const Text(
+                                'Last Heart Rate Measurement',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red,
+                                ),
+                              ),
+                              subtitle: Text(
+                                '${latestBPM.toStringAsFixed(1)} BPM',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      : Container(),
                 ),
-              ),
-            if (latestBPM != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 16.0),
-                child: _buildCard(
-                  title: 'Last Heart Rate Measurement',
-                  subtitle: '${latestBPM.toStringAsFixed(1)} BPM',
-                ),
-              ),
+              ],
+            ),
             if (_isMeasurementActive && _sensorData.isNotEmpty)
               Container(
                 margin: const EdgeInsets.only(top: 16.0),
@@ -162,10 +187,9 @@ class HeartRateScreenState extends State<HeartRateScreen> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.blueGrey[800] ?? Colors.black,
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
+                        color: Colors.blueGrey[800] ?? Colors.black,
+                        blurRadius: 8,
+                        offset: const Offset(0, 2))
                   ],
                 ),
                 height: 180,
@@ -174,9 +198,28 @@ class HeartRateScreenState extends State<HeartRateScreen> {
             if (averageBPM != null)
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
-                child: _buildCard(
-                  title: 'Average Heart Rate',
-                  subtitle: '${averageBPM.toStringAsFixed(1)} BPM',
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(16),
+                    title: const Text(
+                      'Average Heart Rate',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                    ),
+                    subtitle: Text(
+                      '${averageBPM.toStringAsFixed(1)} BPM',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             if (_isMeasurementActive && _bpmData.isNotEmpty)
@@ -188,10 +231,9 @@ class HeartRateScreenState extends State<HeartRateScreen> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.blueGrey[800] ?? Colors.black,
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
+                        color: Colors.blueGrey[800] ?? Colors.black,
+                        blurRadius: 8,
+                        offset: const Offset(0, 2))
                   ],
                 ),
                 constraints: const BoxConstraints.expand(height: 180),
@@ -200,37 +242,63 @@ class HeartRateScreenState extends State<HeartRateScreen> {
             if (maxBPM != null)
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
-                child: _buildCard(
-                  title: 'Maximum Heart Rate',
-                  subtitle: '${maxBPM.toStringAsFixed(1)} BPM',
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(16),
+                    title: const Text(
+                      'Maximum Heart Rate',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                    ),
+                    subtitle: Text(
+                      '${maxBPM.toStringAsFixed(1)} BPM',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             if (minBPM != null)
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
-                child: _buildCard(
-                  title: 'Minimum Heart Rate',
-                  subtitle: '${minBPM.toStringAsFixed(1)} BPM',
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(16),
+                    title: const Text(
+                      'Minimum Heart Rate',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                    ),
+                    subtitle: Text(
+                      '${minBPM.toStringAsFixed(1)} BPM',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             const SizedBox(height: 16),
             Center(
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.favorite_rounded),
-                label: Text(
-                  _isMeasurementActive
-                      ? "Stop Measurement"
-                      : "Start Measurement",
-                ),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.red,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+              child: ButtonsWidget(
+                name: _isMeasurementActive
+                    ? "Stop Measurement"
+                    : "Start Measurement",
                 onPressed: _toggleMeasurement,
               ),
             ),
@@ -238,54 +306,14 @@ class HeartRateScreenState extends State<HeartRateScreen> {
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
                 child: Center(
-                  child: ElevatedButton(
+                  child: ButtonsWidget(
+                    name: 'Upload Heart Rate',
                     onPressed: _uploadData,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 24),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Upload Data',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
                   ),
                 ),
               ),
             const SizedBox(height: 16),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCard({required String title, required String subtitle}) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.red,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey[700],
-          ),
         ),
       ),
     );

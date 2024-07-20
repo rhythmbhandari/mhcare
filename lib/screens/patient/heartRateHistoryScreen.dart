@@ -5,7 +5,9 @@ import '../../services/databaseService.dart';
 import '../../widgets/measurementCard.dart';
 
 class HeartMeasurementsScreen extends StatefulWidget {
-  const HeartMeasurementsScreen({super.key});
+  final String? patientId;
+
+  const HeartMeasurementsScreen({super.key, this.patientId});
 
   @override
   HeartMeasurementsScreenState createState() => HeartMeasurementsScreenState();
@@ -18,21 +20,28 @@ class HeartMeasurementsScreenState extends State<HeartMeasurementsScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchMeasurements;
+    _fetchMeasurements(isUser: widget.patientId == null ? true : false);
     _refreshMeasurements();
   }
 
-  Future<List<HeartMeasurement>> _fetchMeasurements() async {
-    final patient = await SharedPreferenceService().getUser();
-    if (patient == null) {
-      throw Exception('User not found');
+  Future<List<HeartMeasurement>> _fetchMeasurements({isUser = true}) async {
+    if (isUser) {
+      final patient = await SharedPreferenceService().getUser();
+      if (patient == null) {
+        throw Exception('User not found');
+      }
+      return await _heartMeasurementService.fetchMeasurements(patient.idNumber);
+    } else {
+      print(widget.patientId!);
+      return await _heartMeasurementService
+          .fetchMeasurements(widget.patientId!);
     }
-    return await _heartMeasurementService.fetchMeasurements(patient.idNumber);
   }
 
   Future<void> _refreshMeasurements() async {
     setState(() {
-      _measurementsFuture = _fetchMeasurements();
+      _measurementsFuture =
+          _fetchMeasurements(isUser: widget.patientId == null ? true : false);
     });
   }
 
@@ -41,13 +50,13 @@ class HeartMeasurementsScreenState extends State<HeartMeasurementsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Heart Rate Measurements'),
-        backgroundColor: Colors.blueGrey[800],
-        foregroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        automaticallyImplyLeading: true,
+        centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _refreshMeasurements,
-          ),
+              icon: const Icon(Icons.refresh),
+              onPressed: () => _refreshMeasurements()),
         ],
       ),
       body: FutureBuilder<List<HeartMeasurement>>(

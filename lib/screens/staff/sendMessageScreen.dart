@@ -5,23 +5,25 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/message.dart';
 import '../../services/databaseService.dart';
+import '../../widgets/customtextfield.dart';
 
 class ChatScreen extends StatefulWidget {
   final String patientNumber;
   final String patientName;
   final String senderNumber;
 
-  ChatScreen({
+  const ChatScreen({
+    super.key,
     required this.patientNumber,
     required this.patientName,
     required this.senderNumber,
   });
 
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  ChatScreenState createState() => ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class ChatScreenState extends State<ChatScreen> {
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
   List<Message> _messages = [];
@@ -66,7 +68,7 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     final newMessage = Message(
-      id: Uuid().v4(),
+      id: const Uuid().v4(),
       senderNumber: widget.senderNumber,
       receiverNumber: widget.patientNumber,
       message: message,
@@ -96,7 +98,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
       }
@@ -128,16 +130,15 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat with ${widget.patientName}'),
-        foregroundColor: Colors.white,
-        backgroundColor: Colors.teal,
+        title: Text('Chat: ${widget.patientName}'),
+        foregroundColor: Colors.black,
       ),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
               child: _messages.isEmpty
-                  ? Center(child: Text('No messages'))
+                  ? const Center(child: Text('No messages'))
                   : ListView.builder(
                       controller: _scrollController,
                       itemCount: _messages.length,
@@ -175,21 +176,23 @@ class _ChatScreenState extends State<ChatScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: _messageController,
-                      decoration: InputDecoration(
-                        hintText: 'Type a message',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                    child: CustomTextFormField(
+                      labelText: 'Type a message',
+                      textController: _messageController,
+                      onChanged: (_) {},
+                      readOnly: false,
+                      textInputType: TextInputType.name,
+                      inputFormatters: [],
+                      color: Colors.white54,
+                      obscureText: false,
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   _loading
-                      ? CircularProgressIndicator()
+                      ? const CircularProgressIndicator()
                       : IconButton(
-                          icon: Icon(Icons.send),
+                          icon: const Icon(Icons.send,
+                              color: Color.fromRGBO(220, 53, 69, 1)),
                           onPressed: _sendMessage,
                         ),
                 ],

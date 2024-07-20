@@ -17,29 +17,26 @@ Future<void> main() async {
 }
 
 class MHCareApp extends StatelessWidget {
+  const MHCareApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'MH-Care',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light().copyWith(
-        // Customize your dark theme here
-        primaryColor: Colors.teal, // Example: Customize primary color
-        buttonTheme: ButtonThemeData(
-          buttonColor: Colors.teal, // Customize button color
+        primaryColor: Colors.teal,
+        buttonTheme: const ButtonThemeData(
           textTheme: ButtonTextTheme.primary,
-        ),
-        appBarTheme: AppBarTheme(
-          color: Colors.teal, // Customize AppBar color
         ),
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => LoginScreen(),
+        '/': (context) => const LoginScreen(),
         '/shared_home': (context) => SharedHomeScreen(),
-        '/register': (context) => RegistrationPage(),
-        '/patient_home': (context) => PatientHomeScreen(),
-        '/measurement_history': (context) => HeartMeasurementsScreen(),
+        '/register': (context) => const RegistrationPage(),
+        '/patient_home': (context) => const PatientHomeScreen(),
+        '/measurement_history': (context) => const HeartMeasurementsScreen(),
       },
     );
   }

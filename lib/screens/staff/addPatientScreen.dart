@@ -1,24 +1,23 @@
-import 'dart:developer';
-
+import 'package:david/widgets/buttonwidget.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:bcrypt/bcrypt.dart';
 
-import '../../models/user.dart';
+import '../../services/staffService.dart';
+import '../../widgets/customtextfield.dart'; // Ensure this import is correct
 
 class AddPatientScreen extends StatefulWidget {
   @override
-  _AddPatientScreenState createState() => _AddPatientScreenState();
+  AddPatientScreenState createState() => AddPatientScreenState();
 }
 
-class _AddPatientScreenState extends State<AddPatientScreen> {
+class AddPatientScreenState extends State<AddPatientScreen> {
   final _patientNumberController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
   final _dobController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
+  final StaffService _patientService = StaffService();
 
   @override
   void dispose() {
@@ -63,40 +62,29 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
       return;
     }
 
-    final hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-
     try {
-      final userResponse = await Supabase.instance.client.from('users').insert({
-        'password_hash': hashedPassword,
-        'name': name,
-        'role': "patient",
-      }).select();
+      final addedUser = await _patientService.addUser(
+        password: password,
+        name: name,
+        role: "patient",
+      );
 
-      final addedUser = UserModel.fromJson(userResponse[0]);
+      await _patientService.addPatient(
+        patientNumber: addedUser.idNumber,
+        address: address,
+        dateOfBirth: dateOfBirth,
+      );
 
-      final patientResponse =
-          await Supabase.instance.client.from('patients').insert({
-        'patient_number': addedUser.idNumber,
-        'address': address,
-        'date_of_birth': dateOfBirth,
-      });
+      _patientNumberController.clear();
+      _passwordController.clear();
+      _nameController.clear();
+      _addressController.clear();
+      _dobController.clear();
 
-      if (patientResponse == null) {
-        _patientNumberController.clear();
-        _passwordController.clear();
-        _nameController.clear();
-        _addressController.clear();
-        _dobController.clear();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Patient added successfully'),
-          backgroundColor: Colors.green,
-        ));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error adding patient'),
-          backgroundColor: Colors.red,
-        ));
-      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Patient added successfully'),
+        backgroundColor: Colors.green,
+      ));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Error: ${e.toString()}'),
@@ -109,46 +97,68 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add New Patient'),
-        foregroundColor: Colors.white,
-        backgroundColor: Colors.teal,
+        title: const Text('Add Patient'),
+        foregroundColor: Colors.black,
+        automaticallyImplyLeading: true,
+        centerTitle: false,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextFormField(
-              controller: _nameController,
-              decoration: InputDecoration(labelText: 'Name'),
+            CustomTextFormField(
+              labelText: 'Name',
+              textController: _nameController,
+              onChanged: (_) {},
+              readOnly: false,
+              textInputType: TextInputType.name,
+              inputFormatters: [],
+              color: Colors.white54,
+              obscureText: false,
             ),
-            TextFormField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
+            SizedBox(height: 16),
+            CustomTextFormField(
+              labelText: 'Password',
+              textController: _passwordController,
+              onChanged: (_) {},
+              readOnly: false,
+              inputFormatters: [],
+              color: Colors.white54,
+              textInputType: TextInputType.visiblePassword,
               obscureText: true,
             ),
-            TextFormField(
-              controller: _addressController,
-              decoration: InputDecoration(labelText: 'Address'),
+            SizedBox(height: 16),
+            CustomTextFormField(
+              labelText: 'Address',
+              textController: _addressController,
+              onChanged: (_) {},
+              readOnly: false,
+              obscureText: false,
+              color: Colors.white54,
+              inputFormatters: [],
+              textInputType: TextInputType.streetAddress,
             ),
             SizedBox(height: 16),
             GestureDetector(
               onTap: () => _selectDate(context),
               child: AbsorbPointer(
-                child: TextFormField(
-                  controller: _dobController,
-                  decoration: InputDecoration(
-                    labelText: 'Date of Birth',
-                    suffixIcon: Icon(Icons.calendar_today),
-                  ),
+                child: CustomTextFormField(
+                  labelText: 'Date of Birth',
+                  textController: _dobController,
+                  textInputType: TextInputType.datetime,
+                  onChanged: (_) {},
                   readOnly: true,
+                  color: Colors.white54,
+                  inputFormatters: null,
+                  obscureText: false,
                 ),
               ),
             ),
-            SizedBox(height: 16),
-            ElevatedButton(
+            SizedBox(height: 32),
+            ButtonsWidget(
               onPressed: _addPatient,
-              child: Text('Add Patient'),
+              name: 'Add Patient',
             ),
           ],
         ),
