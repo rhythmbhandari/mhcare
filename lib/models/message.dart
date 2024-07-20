@@ -1,7 +1,37 @@
 class Message {
-  final String senderId;
-  final String receiverId;
-  final String content;
+  final String? id;
+  final String senderNumber;
+  final String receiverNumber;
+  final String message;
+  final DateTime sentAt;
 
-  Message({required this.senderId, required this.receiverId, required this.content});
+  Message({
+    this.id,
+    required this.senderNumber,
+    required this.receiverNumber,
+    required this.message,
+    required this.sentAt,
+  });
+
+  // Convert a Message instance to a Map
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'sender_number': senderNumber,
+      'receiver_number': receiverNumber,
+      'message': message,
+      'sent_at': sentAt.toIso8601String(),
+    };
+  }
+
+  // Create a Message instance from a Map
+  factory Message.fromMap(Map<String, dynamic> map) {
+    return Message(
+      id: map['id'],
+      senderNumber: map['sender_number'],
+      receiverNumber: map['receiver_number'],
+      message: map['message'],
+      sentAt: DateTime.parse(map['sent_at']),
+    );
+  }
 }

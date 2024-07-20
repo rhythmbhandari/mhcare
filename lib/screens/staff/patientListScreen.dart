@@ -1,11 +1,12 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Ensure you import this
 
+import '../../services/databaseService.dart';
 import 'patientDetailScreen.dart';
-import 'addDiagnosisScreen.dart'; // Import the AddDiagnosisScreen
+import 'addDiagnosisScreen.dart';
+import 'sendMessageScreen.dart'; // Import the SendMessageScreen
 
 class PatientListScreen extends StatefulWidget {
   @override
@@ -26,7 +27,6 @@ class _PatientListScreenState extends State<PatientListScreen> {
         .from('patient_details')
         .select()
         .order('patient_number', ascending: true);
-    log(response.toString());
     return List<Map<String, dynamic>>.from(response as List);
   }
 
@@ -69,7 +69,7 @@ class _PatientListScreenState extends State<PatientListScreen> {
                   ),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.teal.shade200,
+                      color: Colors.teal.shade300,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: ListTile(
@@ -92,10 +92,9 @@ class _PatientListScreenState extends State<PatientListScreen> {
                       subtitle: Text(
                         'Patient Number: ${patient['patient_number']}',
                         style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white70,
-                            fontStyle: FontStyle.italic,
-                            fontWeight: FontWeight.w500),
+                          fontSize: 16,
+                          color: Colors.white70,
+                        ),
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -103,7 +102,6 @@ class _PatientListScreenState extends State<PatientListScreen> {
                           IconButton(
                             icon: Icon(MdiIcons.hospital, color: Colors.white),
                             onPressed: () async {
-                              // Navigate to AddDiagnosisScreen
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -118,7 +116,6 @@ class _PatientListScreenState extends State<PatientListScreen> {
                           IconButton(
                             icon: Icon(Icons.info, color: Colors.white),
                             onPressed: () async {
-                              // Navigate to PatientDetailScreen
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -127,6 +124,33 @@ class _PatientListScreenState extends State<PatientListScreen> {
                                 ),
                               );
                               _refreshPatients(); // Refresh the list when coming back
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.message, color: Colors.white),
+                            onPressed: () async {
+                              final senderNumber =
+                                  await SharedPreferenceService().getUser();
+                              if (senderNumber != null) {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatScreen(
+                                      patientNumber: patient['patient_number'],
+                                      patientName: patient['user_name'],
+                                      senderNumber: senderNumber.idNumber,
+                                    ),
+                                  ),
+                                );
+                                _refreshPatients(); // Refresh the list when coming back
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Unable to get sender ID'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
                             },
                           ),
                         ],
