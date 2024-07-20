@@ -31,7 +31,7 @@ class Message {
   factory Message.fromMap(Map<String, dynamic> map) {
     return Message(
       id: map['id'],
-      name: map['user']['name'],
+      name: map['user'] != null ? map['user']['name'] : null,
       senderNumber: map['sender_number'],
       receiverNumber: map['receiver_number'],
       message: map['message'],

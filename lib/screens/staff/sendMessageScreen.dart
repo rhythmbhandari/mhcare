@@ -71,12 +71,11 @@ class _ChatScreenState extends State<ChatScreen> {
       receiverNumber: widget.patientNumber,
       message: message,
       sentAt: DateTime.now().toUtc(),
-    );
+    ).toMap();
 
     try {
-      await Supabase.instance.client
-          .from('messages')
-          .insert(newMessage.toMap());
+      newMessage.remove('name');
+      await Supabase.instance.client.from('messages').insert(newMessage);
 
       _messageController.clear();
       _scrollToBottom();

@@ -1,5 +1,5 @@
 import 'dart:developer';
-import 'dart:math';
+import 'dart:math' as e;
 
 import 'package:david/screens/staff/sendMessageScreen.dart';
 import 'package:flutter/material.dart';
@@ -48,6 +48,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
     final Map<String, Message> latestMessages = {};
 
     for (var messageMap in data) {
+      log(messageMap.toString());
       final message = Message.fromMap(messageMap);
 
       final key = '${message.senderNumber}-${message.receiverNumber}';
@@ -108,12 +109,15 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   onTap: () async {
                     final senderNumber =
                         await SharedPreferenceService().getUser();
+                    log(conversation.senderNumber);
+                    log(conversation.name ?? "Unknown");
+                    log(senderNumber?.idNumber ?? "Unknown ID");
                     if (senderNumber != null) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ChatScreen(
-                            patientNumber: conversation.receiverNumber,
+                            patientNumber: conversation.senderNumber,
                             patientName: conversation.name ?? "Unknown",
                             senderNumber: senderNumber.idNumber,
                           ),
@@ -132,7 +136,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
 }
 
 Color getRandomColor() {
-  final random = Random();
+  final random = e.Random();
   return Color.fromARGB(
     255,
     random.nextInt(256),
