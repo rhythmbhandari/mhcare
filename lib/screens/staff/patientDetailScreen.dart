@@ -90,7 +90,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
         backgroundColor: Colors.green,
       ));
 
-      // Optionally, navigate back or refresh data
+      Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Error: ${e.toString()}'),
@@ -108,6 +108,8 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Patient Details'),
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.teal,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -137,12 +139,18 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
               obscureText: true,
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _updatePatientDetails,
-              child: _isLoading
-                  ? CircularProgressIndicator()
-                  : Text('Update Details'),
-            ),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _updatePatientDetails,
+                    child: _isLoading
+                        ? CircularProgressIndicator()
+                        : Text('Update Details'),
+                  ),
+                )
+              ],
+            )
           ],
         ),
       ),

@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Supabase.initialize(
       url: 'https://ggbfkcefnyvtuebpdshe.supabase.co',
       anonKey:
@@ -20,8 +21,16 @@ class MHCareApp extends StatelessWidget {
     return MaterialApp(
       title: 'MH-Care',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      theme: ThemeData.light().copyWith(
+        // Customize your dark theme here
+        primaryColor: Colors.teal, // Example: Customize primary color
+        buttonTheme: ButtonThemeData(
+          buttonColor: Colors.teal, // Customize button color
+          textTheme: ButtonTextTheme.primary,
+        ),
+        appBarTheme: AppBarTheme(
+          color: Colors.teal, // Customize AppBar color
+        ),
       ),
       home: LoginScreen(),
       routes: {

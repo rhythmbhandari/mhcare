@@ -110,6 +110,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Add New Patient'),
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.teal,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bcrypt/bcrypt.dart';
 
 import '../models/user.dart';
+import '../services/databaseService.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -67,6 +70,8 @@ class _LoginScreenState extends State<LoginScreen> {
       log("Here");
       log(response.toString());
       if (BCrypt.checkpw(password, storedPasswordHash)) {
+        SharedPreferenceService().saveUser(user);
+
         String routeName;
 
         switch (user.role) {

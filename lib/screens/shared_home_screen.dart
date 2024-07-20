@@ -16,7 +16,6 @@ class _SharedHomeScreenState extends State<SharedHomeScreen> {
   final List<Widget> _screens = [
     PatientListScreen(),
     AddPatientScreen(),
-    AddDiagnosisScreen(),
     UserInfoScreen(),
   ];
 
@@ -31,6 +30,7 @@ class _SharedHomeScreenState extends State<SharedHomeScreen> {
     return Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.teal,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.list),
@@ -41,17 +41,14 @@ class _SharedHomeScreenState extends State<SharedHomeScreen> {
             label: 'Add Patient',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle),
-            label: 'Add Diagnosis',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.info),
             label: 'User Info',
           ),
         ],
+        showUnselectedLabels: false,
         currentIndex: _currentIndex,
-        unselectedItemColor: Colors.grey,
-        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey.shade400,
+        selectedItemColor: Colors.white,
         onTap: _onItemTapped,
       ),
     );
