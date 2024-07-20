@@ -1,16 +1,14 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/message.dart';
-import '../../services/databaseService.dart';
 import '../../widgets/customtextfield.dart';
 
+/// Chat screen for sending and receiving messages.
 class ChatScreen extends StatefulWidget {
-  final String patientNumber;
+  final String patientNumber; // Receiver's unique identifier
   final String patientName;
-  final String senderNumber;
+  final String senderNumber; // Sender's unique identifier
 
   const ChatScreen({
     super.key,
@@ -28,13 +26,14 @@ class ChatScreenState extends State<ChatScreen> {
   final _scrollController = ScrollController();
   List<Message> _messages = [];
   bool _loading = false;
-  final myChannel = Supabase.instance.client.channel('my_channel');
+  final myChannel = Supabase.instance.client
+      .channel('my_channel'); // Supabase real-time channel
 
   @override
   void initState() {
     super.initState();
-    _fetchMessages();
-    _setupRealTimeSubscription();
+    _fetchMessages(); // Fetch existing messages when the screen initializes
+    _setupRealTimeSubscription(); // Set up real-time message subscription
   }
 
   @override
@@ -45,6 +44,7 @@ class ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
+  /// Fetches chat messages between sender and receiver from the database.
   Future<void> _fetchMessages() async {
     final response = await Supabase.instance.client
         .from('messages')
@@ -59,6 +59,7 @@ class ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  /// Sends a new message to the receiver..
   Future<void> _sendMessage() async {
     final message = _messageController.text.trim();
     if (message.isEmpty) return;
@@ -68,19 +69,19 @@ class ChatScreenState extends State<ChatScreen> {
     });
 
     final newMessage = Message(
-      id: const Uuid().v4(),
+      id: const Uuid().v4(), // Generate a unique ID for the new message
       senderNumber: widget.senderNumber,
       receiverNumber: widget.patientNumber,
       message: message,
-      sentAt: DateTime.now().toUtc(),
+      sentAt: DateTime.now().toUtc(), // Current UTC time
     ).toMap();
 
     try {
-      newMessage.remove('name');
+      newMessage.remove('name'); // Remove unnecessary 'name' field if present
       await Supabase.instance.client.from('messages').insert(newMessage);
 
       _messageController.clear();
-      _scrollToBottom();
+      _scrollToBottom(); // Scroll to the bottom of the chat list
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Error sending message: ${e.toString()}'),
@@ -93,6 +94,7 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  /// Scrolls the chat list to the bottom.
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -105,6 +107,7 @@ class ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  /// Sets up a real-time subscription to listen for new messages.
   void _setupRealTimeSubscription() {
     myChannel
         .onPostgresChanges(
@@ -182,7 +185,7 @@ class ChatScreenState extends State<ChatScreen> {
                       onChanged: (_) {},
                       readOnly: false,
                       textInputType: TextInputType.name,
-                      inputFormatters: [],
+                      inputFormatters: const [],
                       color: Colors.white54,
                       obscureText: false,
                     ),

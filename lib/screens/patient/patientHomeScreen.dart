@@ -5,6 +5,7 @@ import 'diagnosisScreen.dart';
 import 'messagesScreen.dart';
 import 'profileScreen.dart';
 
+/// Main screen for the app for patient users.
 class PatientHomeScreen extends StatefulWidget {
   const PatientHomeScreen({super.key});
 
@@ -13,6 +14,8 @@ class PatientHomeScreen extends StatefulWidget {
 }
 
 class PatientHomeScreenState extends State<PatientHomeScreen> {
+  // Index to track the selected tab in the BottomNavigationBar
+
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
@@ -51,7 +54,7 @@ class PatientHomeScreenState extends State<PatientHomeScreen> {
             label: 'Personal Info',
           ),
         ],
-        currentIndex: _selectedIndex,
+        currentIndex: _selectedIndex, // Highlight the currently selected tab
         selectedItemColor: Colors.blueGrey[800],
         unselectedItemColor: Colors.blueGrey[400],
         showUnselectedLabels: false,

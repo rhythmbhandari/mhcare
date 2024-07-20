@@ -5,6 +5,7 @@ import '../../services/authService.dart';
 import '../../widgets/buttonwidget.dart';
 import '../../widgets/customtextfield.dart';
 
+/// A screen for logging in.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -17,7 +18,8 @@ class LoginScreenState extends State<LoginScreen> {
   final _idNumberController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  final AuthService _authService = AuthService();
+  final AuthService _authService =
+      AuthService(); // Instance of authentication service
 
   @override
   void dispose() {
@@ -26,6 +28,7 @@ class LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  // Handles user login
   Future<void> _login() async {
     setState(() {
       _loading = true;
@@ -34,6 +37,7 @@ class LoginScreenState extends State<LoginScreen> {
     final idNumber = _idNumberController.text.trim();
     final password = _passwordController.text.trim();
 
+    // Check if ID number or password is empty
     if (password.isEmpty || idNumber.isEmpty) {
       _showSnackBar('Please fill all fields', Colors.red);
       setState(() {
@@ -48,14 +52,14 @@ class LoginScreenState extends State<LoginScreen> {
 
       if (user != null) {
         String routeName;
-
+        // Determine route based on user role
         switch (user.role) {
           case 'receptionist':
           case 'doctor':
-            routeName = '/shared_home';
+            routeName = '/shared_home'; // Route for receptionist and doctor
             break;
           case 'patient':
-            routeName = '/patient_home';
+            routeName = '/patient_home'; // Route for patient
             break;
           default:
             _showSnackBar('Unknown user role', Colors.red);
@@ -76,6 +80,7 @@ class LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  // Displays a SnackBar with the provided message and color
   void _showSnackBar(String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(message),
@@ -144,7 +149,8 @@ class LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/register');
+                    Navigator.pushNamed(
+                        context, '/register'); // Navigate to registration page
                   },
                   child: const Text('Register as Staff'),
                 ),

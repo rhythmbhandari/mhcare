@@ -4,9 +4,11 @@ import '../../models/patient.dart';
 import '../../services/patientService.dart';
 import '../../utils/string_utils.dart';
 
+// Profile Screen for Patient
 class PersonalInformationScreen extends StatelessWidget {
   const PersonalInformationScreen({super.key});
 
+  // Handles user logout and navigates back to the home screen
   Future<void> _handleLogout(BuildContext context) async {
     final AuthService authService = AuthService();
     await authService.logout();
@@ -34,7 +36,7 @@ class PersonalInformationScreen extends StatelessWidget {
         ],
       ),
       body: FutureBuilder<PatientModel?>(
-        future: userService.fetchUser(),
+        future: userService.fetchUser(), // Fetch user data from the service
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

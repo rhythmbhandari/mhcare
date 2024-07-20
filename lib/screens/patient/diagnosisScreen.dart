@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/diagnosis.dart';
 import '../../widgets/diagnosisCard.dart';
 
+/// A screen that displays the list of diagnoses.
 class DiagnosisScreen extends StatefulWidget {
   const DiagnosisScreen({super.key});
 
@@ -11,18 +12,21 @@ class DiagnosisScreen extends StatefulWidget {
 }
 
 class DiagnosisScreenState extends State<DiagnosisScreen> {
-  late Future<List<Diagnosis>> _diagnosesFuture;
+  late Future<List<Diagnosis>>
+      _diagnosesFuture; // Future to store the diagnoses list
   final PatientService _diagnosisService = PatientService();
 
   @override
   void initState() {
     super.initState();
-    _diagnosesFuture = _diagnosisService.fetchDiagnoses();
+    _diagnosesFuture = _diagnosisService
+        .fetchDiagnoses(); // Initialize the Future with data fetching
   }
 
   Future<void> _refreshDiagnoses() async {
     setState(() {
-      _diagnosesFuture = _diagnosisService.fetchDiagnoses();
+      _diagnosesFuture =
+          _diagnosisService.fetchDiagnoses(); // Re-fetch the data
     });
   }
 
@@ -36,7 +40,7 @@ class DiagnosisScreenState extends State<DiagnosisScreen> {
         centerTitle: false,
       ),
       body: RefreshIndicator(
-        onRefresh: _refreshDiagnoses,
+        onRefresh: _refreshDiagnoses, // Trigger data refresh on pull-to-refresh
         child: FutureBuilder<List<Diagnosis>>(
           future: _diagnosesFuture,
           builder: (context, snapshot) {
@@ -53,6 +57,8 @@ class DiagnosisScreenState extends State<DiagnosisScreen> {
               return const Center(
                   child: Text('No diagnoses available at this time.'));
             } else {
+              // Display the list of diagnoses if data is successfully fetched
+
               final diagnoses = snapshot.data!;
               return ListView.separated(
                 padding: const EdgeInsets.all(16.0),
@@ -61,6 +67,8 @@ class DiagnosisScreenState extends State<DiagnosisScreen> {
                     Divider(height: 32, color: Colors.grey[300]),
                 itemBuilder: (context, index) {
                   final diagnosis = diagnoses[index];
+                  // Display each diagnosis in a DiagnosisCard widget
+
                   return DiagnosisCard(diagnosis: diagnosis);
                 },
               );

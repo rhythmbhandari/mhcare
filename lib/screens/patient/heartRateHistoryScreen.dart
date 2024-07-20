@@ -4,6 +4,7 @@ import '../../models/heartMeasurement.dart';
 import '../../services/databaseService.dart';
 import '../../widgets/measurementCard.dart';
 
+/// A screen for displaying heart rate measurements.
 class HeartMeasurementsScreen extends StatefulWidget {
   final String? patientId;
 
@@ -20,24 +21,27 @@ class HeartMeasurementsScreenState extends State<HeartMeasurementsScreen> {
   @override
   void initState() {
     super.initState();
+    // Initialize future for fetching measurements, depending on whether patientId is provided
     _fetchMeasurements(isUser: widget.patientId == null ? true : false);
     _refreshMeasurements();
   }
 
+  // Method to fetch heart measurements based on user or specific patient
   Future<List<HeartMeasurement>> _fetchMeasurements({isUser = true}) async {
     if (isUser) {
       final patient = await SharedPreferenceService().getUser();
       if (patient == null) {
         throw Exception('User not found');
       }
-      return await _heartMeasurementService.fetchMeasurements(patient.idNumber);
+      return await _heartMeasurementService.fetchMeasurements(
+          patient.idNumber); // Fetch measurements for the current user
     } else {
-      print(widget.patientId!);
-      return await _heartMeasurementService
-          .fetchMeasurements(widget.patientId!);
+      return await _heartMeasurementService.fetchMeasurements(
+          widget.patientId!); // Fetch measurements for the specific patient
     }
   }
 
+  // Method to refresh measurements data
   Future<void> _refreshMeasurements() async {
     setState(() {
       _measurementsFuture =
@@ -79,7 +83,9 @@ class HeartMeasurementsScreenState extends State<HeartMeasurementsScreen> {
                 itemCount: measurements.length,
                 itemBuilder: (context, index) {
                   final measurement = measurements[index];
-                  return MeasurementCard(measurement: measurement);
+                  return MeasurementCard(
+                      measurement:
+                          measurement); // Display measurement in a card
                 },
               ),
             );

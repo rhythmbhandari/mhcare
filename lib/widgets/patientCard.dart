@@ -7,6 +7,7 @@ import '../screens/staff/sendMessageScreen.dart';
 import '../services/databaseService.dart';
 import 'conversationTile.dart';
 
+//Card component for patient list
 class PatientCard extends StatelessWidget {
   final Map<String, dynamic> patient;
   final VoidCallback onUpdate;
@@ -62,6 +63,7 @@ class PatientCard extends StatelessWidget {
           trailing: IconButton(
             icon: const Icon(Icons.info, color: Colors.black38),
             onPressed: () async {
+              // Navigate to the PatientDetailScreen and refresh the data when coming back
               await Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -74,7 +76,7 @@ class PatientCard extends StatelessWidget {
             },
           ),
         ),
-        _buildActions(context),
+        _buildActions(context), // Add action buttons below the ListTile
       ]),
     );
   }
@@ -84,8 +86,10 @@ class PatientCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         IconButton(
-          icon: Icon(Icons.favorite, color: Colors.red),
+          icon: const Icon(Icons.favorite, color: Colors.red),
           onPressed: () async {
+            // Navigate to the HeartMeasurementsScreen and refresh the data when coming back
+
             await Navigator.push(
               context,
               MaterialPageRoute(
@@ -100,6 +104,8 @@ class PatientCard extends StatelessWidget {
         IconButton(
           icon: Icon(Icons.local_hospital, color: Colors.teal.shade800),
           onPressed: () async {
+            // Navigate to the AddDiagnosisScreen and refresh the data when coming back
+
             await Navigator.push(
               context,
               MaterialPageRoute(
@@ -114,8 +120,12 @@ class PatientCard extends StatelessWidget {
         IconButton(
           icon: Icon(Icons.message, color: Colors.blue.shade800),
           onPressed: () async {
+            // Fetch the sender number from shared preferences
+
             final senderNumber = await SharedPreferenceService().getUser();
             if (senderNumber != null) {
+              // Navigate to the ChatScreen and refresh the data when coming back
+
               await Navigator.push(
                 context,
                 MaterialPageRoute(

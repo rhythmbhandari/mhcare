@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../models/diagnosis.dart';
 import 'conversationTile.dart';
 
+// Diagnosis card widget
 class DiagnosisCard extends StatelessWidget {
   final Diagnosis diagnosis;
 
@@ -18,8 +19,8 @@ class DiagnosisCard extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: Colors.grey.shade200,
-            offset: const Offset(0, 4),
-            blurRadius: 8,
+            offset: const Offset(0, 4), // Shadow position
+            blurRadius: 8, // Shadow blur effect
           ),
         ],
       ),
@@ -29,12 +30,14 @@ class DiagnosisCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: getRandomColor(),
+              color: getRandomColor(), // Random color for the icon background
               shape: BoxShape.rectangle,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
               child: Text(
+                // First letter of the doctor's name or 'D' if the name is empty
+
                 diagnosis.doctorName.isNotEmpty ? diagnosis.doctorName[0] : 'D',
                 style: const TextStyle(
                   color: Colors.white,
@@ -77,6 +80,8 @@ class DiagnosisCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
+                // Diagnosis date formatted
+
                 Text(
                   'Date: ${DateFormat('MMMM d, yyyy – h:mm a').format(diagnosis.diagnosisDate.toLocal())}',
                   style: TextStyle(

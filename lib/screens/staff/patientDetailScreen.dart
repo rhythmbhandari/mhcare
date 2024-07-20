@@ -4,6 +4,7 @@ import 'package:david/widgets/customtextfield.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+/// A screen for viewing and updating patient details.
 class PatientDetailScreen extends StatefulWidget {
   final Map<String, dynamic> patient;
 
@@ -28,6 +29,7 @@ class PatientDetailScreenState extends State<PatientDetailScreen> {
     _initializeFields();
   }
 
+  /// Initializes the text fields with the current patient data.
   void _initializeFields() {
     _nameController.text = widget.patient['user_name'] ?? '';
     _addressController.text = widget.patient['address'] ?? '';
@@ -44,6 +46,7 @@ class PatientDetailScreenState extends State<PatientDetailScreen> {
     super.dispose();
   }
 
+  /// Opens a date picker and updates the selected date.
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -59,6 +62,7 @@ class PatientDetailScreenState extends State<PatientDetailScreen> {
     }
   }
 
+  /// Updates the patient details in the database.
   Future<void> _updatePatientDetails() async {
     setState(() {
       _isLoading = true;
@@ -139,6 +143,7 @@ class PatientDetailScreenState extends State<PatientDetailScreen> {
     );
   }
 
+  /// Creates a text field widget.
   CustomTextFormField _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -154,6 +159,7 @@ class PatientDetailScreenState extends State<PatientDetailScreen> {
     );
   }
 
+  /// Creates a date of birth text field that is disabled and opens the date picker on tap.
   Widget _buildDateOfBirthField() {
     return GestureDetector(
       onTap: () => _selectDate(context),
@@ -169,6 +175,7 @@ class PatientDetailScreenState extends State<PatientDetailScreen> {
     );
   }
 
+  /// Creates an update button with loading indicator.
   Widget _buildUpdateButton() {
     return ButtonsWidget(
       name: "Update Details",

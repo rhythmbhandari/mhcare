@@ -1,12 +1,10 @@
-import 'dart:convert';
-
 class HeartMeasurement {
   HeartMeasurement({
     required this.id,
-    required this.patientId,
-    required this.averageBpm,
-    required this.maxBpm,
-    required this.minBpm,
+    required this.patientId, // ID of the patient the measurement belongs to
+    required this.averageBpm, // Average beats per minute
+    required this.maxBpm, // Maximum beats per minute
+    required this.minBpm, // Minimum beats per minute
     required this.recordedAt,
   });
 

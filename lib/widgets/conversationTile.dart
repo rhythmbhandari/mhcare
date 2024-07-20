@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../models/message.dart';
 import '../utils/string_utils.dart';
 
+// ConversationTile widget
 class ConversationTile extends StatelessWidget {
   final Message message;
   final VoidCallback onTap;
@@ -42,7 +43,7 @@ class RandomColorAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = getRandomColor(); // Generate a random color
+    final backgroundColor = getRandomColor();
 
     return CircleAvatar(
       backgroundColor: backgroundColor,

@@ -15,22 +15,23 @@ class ButtonsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: isLoading ? null : onPressed,
+      onTap: isLoading ? null : onPressed, // Disable tap if loading
       child: Container(
         padding: const EdgeInsets.symmetric(
           vertical: 14,
         ),
         decoration: BoxDecoration(
-          color: Color.fromRGBO(220, 53, 69, 1),
+          color: const Color.fromRGBO(220, 53, 69, 1),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Center(
           child: isLoading
-              ? SizedBox(
+              ? const SizedBox(
                   height: 24,
                   width: 24,
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        Colors.white), // White color for the loading spinner
                   ),
                 )
               : Text(name,

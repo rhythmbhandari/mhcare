@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../services/staffService.dart';
-import '../../widgets/customtextfield.dart'; // Ensure this import is correct
+import '../../widgets/customtextfield.dart';
 
+/// A screen for adding new patients.
 class AddPatientScreen extends StatefulWidget {
+  const AddPatientScreen({super.key});
+
   @override
   AddPatientScreenState createState() => AddPatientScreenState();
 }
@@ -16,6 +19,7 @@ class AddPatientScreenState extends State<AddPatientScreen> {
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
   final _dobController = TextEditingController();
+  // Default to current date for DatePicker
   DateTime _selectedDate = DateTime.now();
   final StaffService _patientService = StaffService();
 
@@ -46,6 +50,8 @@ class AddPatientScreenState extends State<AddPatientScreen> {
   }
 
   Future<void> _addPatient() async {
+    // Collect data from the text fields
+
     final password = _passwordController.text.trim();
     final name = _nameController.text.trim();
     final address = _addressController.text.trim();
@@ -55,7 +61,7 @@ class AddPatientScreenState extends State<AddPatientScreen> {
         name.isEmpty ||
         address.isEmpty ||
         dateOfBirth.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Please fill out all fields'),
         backgroundColor: Colors.red,
       ));
@@ -63,6 +69,8 @@ class AddPatientScreenState extends State<AddPatientScreen> {
     }
 
     try {
+      // Add a new user and patient
+
       final addedUser = await _patientService.addUser(
         password: password,
         name: name,
@@ -75,13 +83,14 @@ class AddPatientScreenState extends State<AddPatientScreen> {
         dateOfBirth: dateOfBirth,
       );
 
+      // Clear all text fields
       _patientNumberController.clear();
       _passwordController.clear();
       _nameController.clear();
       _addressController.clear();
       _dobController.clear();
 
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Patient added successfully'),
         backgroundColor: Colors.green,
       ));
@@ -117,7 +126,7 @@ class AddPatientScreenState extends State<AddPatientScreen> {
               color: Colors.white54,
               obscureText: false,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             CustomTextFormField(
               labelText: 'Password',
               textController: _passwordController,
@@ -128,7 +137,7 @@ class AddPatientScreenState extends State<AddPatientScreen> {
               textInputType: TextInputType.visiblePassword,
               obscureText: true,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             CustomTextFormField(
               labelText: 'Address',
               textController: _addressController,
@@ -139,7 +148,7 @@ class AddPatientScreenState extends State<AddPatientScreen> {
               inputFormatters: [],
               textInputType: TextInputType.streetAddress,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             GestureDetector(
               onTap: () => _selectDate(context),
               child: AbsorbPointer(
@@ -155,7 +164,7 @@ class AddPatientScreenState extends State<AddPatientScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
             ButtonsWidget(
               onPressed: _addPatient,
               name: 'Add Patient',

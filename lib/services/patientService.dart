@@ -5,9 +5,14 @@ import '../models/message.dart';
 import '../models/patient.dart';
 import 'databaseService.dart';
 
+/// Service class for managing patient-related operations.
 class PatientService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
+  /// Fetches the list of diagnoses for the current patient.
+  ///
+  /// Retrieves the patient information from shared preferences.
+  /// Returns a list of [Diagnosis] objects.
   Future<List<Diagnosis>> fetchDiagnoses() async {
     final patient = await SharedPreferenceService().getUser();
     if (patient == null) {
@@ -36,6 +41,10 @@ class PatientService {
     }).toList();
   }
 
+  /// Fetches the list of latest conversations for the current patient.
+  ///
+  /// Retrieves the patient information from shared preferences.
+  /// Returns a list of [Message] objects.
   Future<List<Message>> fetchConversations() async {
     final patient = await SharedPreferenceService().getUser();
     if (patient == null) {
@@ -66,6 +75,10 @@ class PatientService {
     return latestMessages.values.toList();
   }
 
+  /// Fetches the list of heart measurements for a specific patient.
+  ///
+  /// Takes the patient ID as a parameter.
+  /// Returns a list of [HeartMeasurement] objects.
   Future<List<HeartMeasurement>> fetchMeasurements(String patientId) async {
     final response = await _supabase
         .from('heartratemeasurements')
@@ -78,6 +91,11 @@ class PatientService {
 
     return data.map((map) => HeartMeasurement.fromMap(map)).toList();
   }
+
+  /// Fetches the current user's patient information.
+  ///
+  /// Retrieves the user information from shared preferences.
+  /// Returns a [PatientModel] object.
 
   Future<PatientModel?> fetchUser() async {
     final user = await SharedPreferenceService().getUser();

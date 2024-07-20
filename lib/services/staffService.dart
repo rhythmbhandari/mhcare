@@ -3,9 +3,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/user.dart';
 
+// Service class for managining staff operations
 class StaffService {
   final SupabaseClient _client = Supabase.instance.client;
 
+  /// Fetches the list of doctors from the database.
+  ///
+  /// Returns a list of maps containing doctor ID numbers and names.
   Future<List<Map<String, dynamic>>> fetchDoctors() async {
     try {
       final response = await _client
@@ -19,6 +23,9 @@ class StaffService {
     }
   }
 
+  /// Adds a new diagnosis to the database.
+  ///
+  /// Takes the patient number, doctor number, diagnosis, and description as required parameters.
   Future<void> addDiagnosis({
     required String patientNumber,
     required String doctorNumber,
@@ -38,12 +45,17 @@ class StaffService {
     }
   }
 
+  /// Adds a new user to the database.
+  ///
+  /// Takes the password, name, and role as required parameters.
+  /// Returns the created [UserModel].
   Future<UserModel> addUser({
     required String password,
     required String name,
     required String role,
   }) async {
     try {
+      //Hashing the password before storing it using BCrypt: package:bcrypt/src/bcrypt_base.dart
       final hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
       final response = await _client.from('users').insert({
@@ -58,6 +70,9 @@ class StaffService {
     }
   }
 
+  /// Adds a new patient to the database.
+  ///
+  /// Takes the patient number, address, and date of birth as required parameters.
   Future<void> addPatient({
     required String patientNumber,
     required String address,
@@ -74,6 +89,9 @@ class StaffService {
     }
   }
 
+  /// Updates an existing patient in the database.
+  ///
+  /// Takes the patient number, address, and date of birth as required parameters.
   Future<void> updatePatient({
     required String patientNumber,
     required String address,
@@ -89,6 +107,10 @@ class StaffService {
     }
   }
 
+  /// Updates an existing user in the database.
+  ///
+  /// Takes the ID number and name as required parameters, and the password as an optional parameter.
+  /// If the password is provided and not empty, it will be hashed and updated.
   Future<void> updateUser({
     required String idNumber,
     required String name,
@@ -107,6 +129,9 @@ class StaffService {
     }
   }
 
+  /// Fetches the list of patients from the database.
+  ///
+  /// Returns a list of maps containing patient details.
   Future<List<Map<String, dynamic>>> fetchPatients() async {
     try {
       final response = await _client

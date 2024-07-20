@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+// Custom Text Form Field component
 class CustomTextFormField extends StatefulWidget {
   const CustomTextFormField({
     Key? key,
@@ -19,8 +20,9 @@ class CustomTextFormField extends StatefulWidget {
   final String labelText;
   final bool readOnly;
   final Color color;
-  final bool obscureText;
-  final TextInputType textInputType;
+  final bool
+      obscureText; // Whether the text form field should obscure text (e.g., for passwords)
+  final TextInputType textInputType; // Input formatters for the text form field
   final bool enabled;
   final List<TextInputFormatter>? inputFormatters;
   final TextEditingController? textController;
@@ -32,7 +34,7 @@ class CustomTextFormField extends StatefulWidget {
 }
 
 class CustomTextFormFieldState extends State<CustomTextFormField> {
-  late bool _obscureText;
+  late bool _obscureText; // Local state for managing obscure text
 
   @override
   void initState() {
@@ -73,10 +75,11 @@ class CustomTextFormFieldState extends State<CustomTextFormField> {
         keyboardType: widget.textInputType,
         onChanged: widget.onChanged,
         decoration: InputDecoration(
-          floatingLabelBehavior: FloatingLabelBehavior.auto,
+          floatingLabelBehavior:
+              FloatingLabelBehavior.auto, // Auto float label behavior
           fillColor: Colors.white,
           filled: false,
-          border: InputBorder.none,
+          border: InputBorder.none, // Remove default border
           labelText: widget.labelText,
           labelStyle: Theme.of(context)
               .textTheme
@@ -85,7 +88,9 @@ class CustomTextFormFieldState extends State<CustomTextFormField> {
           suffixIcon: widget.obscureText
               ? IconButton(
                   icon: Icon(
-                    _obscureText ? Icons.visibility : Icons.visibility_off,
+                    _obscureText
+                        ? Icons.visibility
+                        : Icons.visibility_off, // Icon for showing/hiding text
                     color: Colors.grey,
                   ),
                   onPressed: _toggleObscureText,

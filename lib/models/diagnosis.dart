@@ -3,7 +3,7 @@ class Diagnosis {
   final String patientNumber;
   final String doctorNumber;
   final String diagnosis;
-  final String? desc;
+  final String? desc; // Optional description
   final DateTime diagnosisDate;
   final String doctorName;
 

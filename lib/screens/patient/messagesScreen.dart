@@ -5,6 +5,7 @@ import '../../models/message.dart';
 import '../../widgets/conversationTile.dart';
 import '../staff/sendMessageScreen.dart';
 
+/// A screen for displaying messages.
 class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
 
@@ -19,9 +20,11 @@ class MessagesScreenState extends State<MessagesScreen> {
   @override
   void initState() {
     super.initState();
-    _conversationsFuture = _messagesService.fetchConversations();
+    _conversationsFuture = _messagesService
+        .fetchConversations(); // Initialize future to fetch conversations
   }
 
+  // Method to refresh the list of conversations
   Future<void> _refreshConversations() async {
     setState(() {
       _conversationsFuture = _messagesService.fetchConversations();
@@ -54,7 +57,7 @@ class MessagesScreenState extends State<MessagesScreen> {
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return const Center(child: Text('No conversations available.'));
             } else {
-              final conversations = snapshot.data!;
+              final conversations = snapshot.data!; // Get list of conversations
               return ListView.separated(
                 padding: const EdgeInsets.all(16.0),
                 itemCount: conversations.length,
@@ -63,11 +66,13 @@ class MessagesScreenState extends State<MessagesScreen> {
                 itemBuilder: (context, index) {
                   final conversation = conversations[index];
                   return ConversationTile(
-                    message: conversation,
+                    message: conversation, // Pass conversation to tile widget
                     onTap: () async {
                       final senderNumber =
                           await SharedPreferenceService().getUser();
                       if (senderNumber != null) {
+                        // Navigate to chat screen on tap
+
                         Navigator.push(
                           context,
                           MaterialPageRoute(

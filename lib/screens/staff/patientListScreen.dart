@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../widgets/patientCard.dart';
 
+/// A screen that displays a list of patients.
 class PatientListScreen extends StatefulWidget {
   const PatientListScreen({super.key});
 
@@ -17,9 +18,10 @@ class PatientListScreenState extends State<PatientListScreen> {
   @override
   void initState() {
     super.initState();
-    _refreshPatients();
+    _refreshPatients(); // Initialize the patient list fetch
   }
 
+  /// Refreshes the list of patients.
   Future<void> _refreshPatients() async {
     setState(() {
       _patientsFuture = _patientService.fetchPatients();
@@ -36,7 +38,7 @@ class PatientListScreenState extends State<PatientListScreen> {
         centerTitle: false,
       ),
       body: RefreshIndicator(
-        onRefresh: _refreshPatients,
+        onRefresh: _refreshPatients, // Trigger refresh on swipe down
         child: FutureBuilder<List<Map<String, dynamic>>>(
           future: _patientsFuture,
           builder: (context, snapshot) {

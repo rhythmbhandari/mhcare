@@ -1,7 +1,7 @@
 class UserModel {
   final String idNumber;
   final String passwordHash;
-  final String role;
+  final String role; // Role of the user (e.g: doctor, receptionist, patient)
   final String name;
 
   UserModel({

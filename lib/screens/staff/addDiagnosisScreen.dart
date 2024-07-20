@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import '../../services/staffService.dart';
 import '../../widgets/customtextfield.dart';
 
+/// A screen that adds diagnosis to the patient.
 class AddDiagnosisScreen extends StatefulWidget {
   final String patientNumber;
 
+  // Constructor to accept patientNumber as a required parameter
   const AddDiagnosisScreen({required this.patientNumber, Key? key})
       : super(key: key);
 
@@ -23,6 +25,7 @@ class AddDiagnosisScreenState extends State<AddDiagnosisScreen> {
   @override
   void initState() {
     super.initState();
+    // Fetch the list of doctors when the screen is initialized
     _fetchDoctors();
   }
 
@@ -31,6 +34,8 @@ class AddDiagnosisScreenState extends State<AddDiagnosisScreen> {
       final doctors = await _diagnosisService.fetchDoctors();
       setState(() {
         _doctors = doctors;
+        // Set the first doctor as the default selection, if available
+
         _selectedDoctorId =
             _doctors.isNotEmpty ? _doctors[0]['id_number'] : null;
       });
@@ -42,6 +47,7 @@ class AddDiagnosisScreenState extends State<AddDiagnosisScreen> {
   Future<void> _addDiagnosis() async {
     final diagnosis = _diagnosisController.text.trim();
     final description = _descriptionController.text.trim();
+    // Check if all required fields are filled
 
     if (_selectedDoctorId == null || diagnosis.isEmpty) {
       _showErrorSnackBar('Please fill out all fields');
@@ -49,6 +55,8 @@ class AddDiagnosisScreenState extends State<AddDiagnosisScreen> {
     }
 
     try {
+      // Add diagnosis using the service
+
       await _diagnosisService.addDiagnosis(
         patientNumber: widget.patientNumber,
         doctorNumber: _selectedDoctorId!,
@@ -127,7 +135,7 @@ class AddDiagnosisScreenState extends State<AddDiagnosisScreen> {
                 dropdownColor: Colors.white,
               ),
             ),
-            SizedBox(height: 18),
+            const SizedBox(height: 18),
             CustomTextFormField(
               labelText: 'Diagnosis',
               textController: _diagnosisController,
@@ -138,7 +146,7 @@ class AddDiagnosisScreenState extends State<AddDiagnosisScreen> {
               color: Colors.white54,
               obscureText: false,
             ),
-            SizedBox(height: 18),
+            const SizedBox(height: 18),
             CustomTextFormField(
               labelText: 'Description',
               textController: _descriptionController,

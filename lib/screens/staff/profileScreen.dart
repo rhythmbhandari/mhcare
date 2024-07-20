@@ -4,13 +4,16 @@ import '../../services/authService.dart';
 import '../../services/databaseService.dart';
 import '../../utils/string_utils.dart';
 
+/// Profile Screen for Staff
 class UserInfoScreen extends StatelessWidget {
   const UserInfoScreen({super.key});
 
+  /// Fetches user data from shared preferences.
   Future<UserModel?> _fetchUser() async {
     return await SharedPreferenceService().getUser();
   }
 
+  /// Logs out the user and navigates to the home screen.
   Future<void> _logout(BuildContext context) async {
     await AuthService().logout();
     Navigator.of(context).popAndPushNamed('/');

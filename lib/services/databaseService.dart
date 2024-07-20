@@ -2,15 +2,15 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 
+/// Service class for shared preference.
 class SharedPreferenceService {
   // Private constructor
   SharedPreferenceService._privateConstructor();
 
-  // Static instance
   static final SharedPreferenceService _instance =
       SharedPreferenceService._privateConstructor();
 
-  // Factory constructor to return the same instance
+  // Constructor to use the same instance
   factory SharedPreferenceService() {
     return _instance;
   }

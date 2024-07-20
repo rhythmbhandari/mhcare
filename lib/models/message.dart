@@ -1,7 +1,7 @@
 class Message {
   final String? id;
-  final String senderNumber;
-  final String receiverNumber;
+  final String senderNumber; // ID numbner of the sender
+  final String receiverNumber; // ID number of the receiver
   final String message;
   final String? name;
   final DateTime sentAt;

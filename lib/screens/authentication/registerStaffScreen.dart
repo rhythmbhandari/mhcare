@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/buttonwidget.dart';
 import '../../widgets/customtextfield.dart';
 
+/// A screen for registering a new staff.
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
 
@@ -13,7 +14,7 @@ class RegistrationPage extends StatefulWidget {
 class RegistrationPageState extends State<RegistrationPage> {
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
-  String _selectedRole = 'Doctor';
+  String _selectedRole = 'Doctor'; // Default selected role
   bool _loading = false;
 
   final AuthService _authService = AuthService();
@@ -24,6 +25,8 @@ class RegistrationPageState extends State<RegistrationPage> {
     _nameController.dispose();
     super.dispose();
   }
+
+  // Handles user registration
 
   Future<void> _register() async {
     setState(() {
@@ -45,6 +48,8 @@ class RegistrationPageState extends State<RegistrationPage> {
     }
 
     try {
+      // Attempt to register the user
+
       final response = await _authService.register(
         name: name,
         password: password,
