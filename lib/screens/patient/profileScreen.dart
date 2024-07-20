@@ -1,66 +1,39 @@
-import 'dart:developer';
+import 'package:david/services/authService.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/patient.dart';
-import '../../services/authService.dart';
-import '../../services/databaseService.dart';
+import '../../services/patientService.dart';
 import '../../utils/string_utils.dart';
 
 class PersonalInformationScreen extends StatelessWidget {
   const PersonalInformationScreen({super.key});
 
-  Future<PatientModel?> _fetchUser() async {
-    final user = await SharedPreferenceService().getUser();
-    if (user == null) {
-      throw Exception('User not found');
-    }
-
-    final response = await Supabase.instance.client
-        .from('patients')
-        .select()
-        .eq('patient_number', user.idNumber)
-        .single();
-    final Map<String, dynamic> data = response;
-
-    final result = PatientModel.fromJson({
-      'id_number': user.idNumber,
-      'password_hash': user.passwordHash,
-      'role': user.role,
-      'name': user.name,
-      'address': data['address'],
-      'date_of_birth': data['date_of_birth'],
-    });
-    return result;
-  }
-
-  Future<void> _logout(BuildContext context) async {
-    await AuthService()
-        .logout(); // Assuming you have a logout method in AuthService
-    Navigator.of(context)
-        .popAndPushNamed('/'); // Navigate to login screen after logout
+  Future<void> _handleLogout(BuildContext context) async {
+    final AuthService authService = AuthService();
+    await authService.logout();
+    Navigator.of(context).popAndPushNamed('/');
   }
 
   @override
   Widget build(BuildContext context) {
+    final PatientService userService = PatientService();
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
+        title: const Text('Profile'),
         foregroundColor: Colors.white,
-        backgroundColor:
-            Colors.blueGrey[800], // Updated color for professionalism
+        backgroundColor: Colors.blueGrey[800],
       ),
       body: FutureBuilder<PatientModel?>(
-        future: _fetchUser(),
+        future: userService.fetchUser(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data == null) {
-            return Center(child: Text('No user data available'));
+            return const Center(child: Text('No user data available'));
           } else {
             final user = snapshot.data!;
-            final userName = user.idNumber;
             final avatarText = user.name.isNotEmpty ? user.name[0] : 'U';
 
             return Center(
@@ -71,70 +44,66 @@ class PersonalInformationScreen extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 50,
-                      backgroundColor: Colors
-                          .blueGrey[200], // Updated color for professionalism
+                      backgroundColor: Colors.blueGrey[200],
                       child: Text(
                         avatarText.toUpperCase(),
                         style: TextStyle(
-                            color: Colors.blueGrey[800], fontSize: 36),
+                          color: Colors.blueGrey[800],
+                          fontSize: 36,
+                        ),
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
-                      userName,
+                      user.idNumber,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 24,
-                        color: Colors
-                            .blueGrey[800], // Updated color for professionalism
+                        color: Colors.blueGrey[800],
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
-                      user.name ?? 'No name',
+                      user.name,
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors
-                            .blueGrey[600], // Updated color for professionalism
+                        color: Colors.blueGrey[600],
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       'Role: ${capitalizeFirstLetter(user.role)}',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors
-                            .blueGrey[600], // Updated color for professionalism
+                        color: Colors.blueGrey[600],
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
                       'Address: ${user.address ?? 'No address'}',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors
-                            .blueGrey[600], // Updated color for professionalism
+                        color: Colors.blueGrey[600],
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       'Date of Birth: ${user.dateOfBirth}',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors
-                            .blueGrey[600], // Updated color for professionalism
+                        color: Colors.blueGrey[600],
                       ),
                     ),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: () => _logout(context),
-                      child: Text('Logout'),
+                      onPressed: () => _handleLogout(context),
+                      child: const Text('Logout'),
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 12),
                       ),
                     ),
                   ],

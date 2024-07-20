@@ -1,59 +1,28 @@
-import 'dart:developer';
-
+import 'package:david/services/patientService.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../../models/diagnosis.dart';
-import '../../services/databaseService.dart';
+import '../../widgets/diagnosisCard.dart';
 
 class DiagnosisScreen extends StatefulWidget {
   const DiagnosisScreen({super.key});
 
   @override
-  _DiagnosisScreenState createState() => _DiagnosisScreenState();
+  DiagnosisScreenState createState() => DiagnosisScreenState();
 }
 
-class _DiagnosisScreenState extends State<DiagnosisScreen> {
+class DiagnosisScreenState extends State<DiagnosisScreen> {
   late Future<List<Diagnosis>> _diagnosesFuture;
+  final PatientService _diagnosisService = PatientService();
 
   @override
   void initState() {
     super.initState();
-    _diagnosesFuture = _fetchDiagnoses();
-  }
-
-  Future<List<Diagnosis>> _fetchDiagnoses() async {
-    final patient = await SharedPreferenceService().getUser();
-    if (patient == null) {
-      throw Exception('User not found');
-    }
-    final response = await Supabase.instance.client
-        .from('diagnoses')
-        .select('*, user:doctor_number(id_number, name)')
-        .eq('patient_number', patient.idNumber)
-        .order('diagnosis_date', ascending: false);
-
-    final List<Map<String, dynamic>> data =
-        List<Map<String, dynamic>>.from(response);
-
-    return data.map((e) {
-      final doctor = e['user'];
-      return Diagnosis(
-        id: e['id'],
-        patientNumber: e['patient_number'],
-        doctorNumber: e['doctor_number'],
-        diagnosis: e['diagnosis'],
-        desc: e['desc'] ?? "",
-        diagnosisDate: DateTime.parse(e['diagnosis_date']),
-        doctorName: doctor['name'],
-      );
-    }).toList();
+    _diagnosesFuture = _diagnosisService.fetchDiagnoses();
   }
 
   Future<void> _refreshDiagnoses() async {
     setState(() {
-      _diagnosesFuture = _fetchDiagnoses();
+      _diagnosesFuture = _diagnosisService.fetchDiagnoses();
     });
   }
 
@@ -71,7 +40,7 @@ class _DiagnosisScreenState extends State<DiagnosisScreen> {
           future: _diagnosesFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
               return Center(
                 child: Text(
@@ -80,7 +49,7 @@ class _DiagnosisScreenState extends State<DiagnosisScreen> {
                 ),
               );
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(
+              return const Center(
                   child: Text('No diagnoses available at this time.'));
             } else {
               final diagnoses = snapshot.data!;
@@ -91,83 +60,7 @@ class _DiagnosisScreenState extends State<DiagnosisScreen> {
                     Divider(height: 32, color: Colors.grey[300]),
                 itemBuilder: (context, index) {
                   final diagnosis = diagnoses[index];
-                  return Container(
-                    padding: const EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.shade200,
-                          offset: Offset(0, 4),
-                          blurRadius: 8,
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 30,
-                          backgroundColor: Colors.blueGrey[100],
-                          child: Text(
-                            diagnosis.doctorName.isNotEmpty
-                                ? diagnosis.doctorName[0]
-                                : 'D',
-                            style: TextStyle(
-                              color: Colors.blueGrey[800],
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                diagnosis.diagnosis,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: Colors.blueGrey[800],
-                                ),
-                              ),
-                              if (diagnosis.desc != null &&
-                                  diagnosis.desc!.isNotEmpty)
-                                SizedBox(height: 8),
-                              if (diagnosis.desc != null &&
-                                  diagnosis.desc!.isNotEmpty)
-                                Text(
-                                  diagnosis.desc!,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontStyle: FontStyle.italic,
-                                    color: Colors.blueGrey[600],
-                                  ),
-                                ),
-                              SizedBox(height: 8),
-                              Text(
-                                'Doctor: ${diagnosis.doctorName}',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.blueGrey[600],
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Date: ${DateFormat('MMMM d, yyyy – h:mm a').format(diagnosis.diagnosisDate.toLocal())}',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.blueGrey[500],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
+                  return DiagnosisCard(diagnosis: diagnosis);
                 },
               );
             }

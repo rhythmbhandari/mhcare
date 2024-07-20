@@ -1,65 +1,30 @@
-import 'dart:developer';
-import 'dart:math' as e;
-
+import 'package:david/services/patientService.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-import '../../models/message.dart';
 import '../../services/databaseService.dart';
-import '../../utils/string_utils.dart';
+import '../../models/message.dart';
+import '../../widgets/conversationTile.dart';
 import '../staff/sendMessageScreen.dart';
 
 class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
 
   @override
-  _MessagesScreenState createState() => _MessagesScreenState();
+  MessagesScreenState createState() => MessagesScreenState();
 }
 
-class _MessagesScreenState extends State<MessagesScreen> {
+class MessagesScreenState extends State<MessagesScreen> {
   late Future<List<Message>> _conversationsFuture;
+  final PatientService _messagesService = PatientService();
 
   @override
   void initState() {
     super.initState();
-    _conversationsFuture = _fetchConversations();
-  }
-
-  Future<List<Message>> _fetchConversations() async {
-    final patient = await SharedPreferenceService().getUser();
-    if (patient == null) {
-      throw Exception('User not found');
-    }
-    final response = await Supabase.instance.client
-        .from('messages')
-        .select('*, user:sender_number(id_number, name)')
-        .eq('receiver_number', patient.idNumber)
-        .order('sent_at', ascending: false);
-
-    final List<Map<String, dynamic>> data =
-        List<Map<String, dynamic>>.from(response as List<dynamic>);
-
-    final Map<String, Message> latestMessages = {};
-
-    for (var messageMap in data) {
-      log(messageMap.toString());
-      final message = Message.fromMap(messageMap);
-
-      final key = '${message.senderNumber}-${message.receiverNumber}';
-
-      if (!latestMessages.containsKey(key) ||
-          message.sentAt.isAfter(latestMessages[key]!.sentAt)) {
-        latestMessages[key] = message;
-      }
-    }
-
-    return latestMessages.values.toList();
+    _conversationsFuture = _messagesService.fetchConversations();
   }
 
   Future<void> _refreshConversations() async {
     setState(() {
-      _conversationsFuture = _fetchConversations();
+      _conversationsFuture = _messagesService.fetchConversations();
     });
   }
 
@@ -77,7 +42,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
           future: _conversationsFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
               return Center(
                 child: Text(
@@ -86,7 +51,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 ),
               );
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(child: Text('No conversations available.'));
+              return const Center(child: Text('No conversations available.'));
             } else {
               final conversations = snapshot.data!;
               return ListView.separated(
@@ -96,23 +61,8 @@ class _MessagesScreenState extends State<MessagesScreen> {
                     Divider(height: 32, color: Colors.grey[300]),
                 itemBuilder: (context, index) {
                   final conversation = conversations[index];
-                  return ListTile(
-                    leading: RandomColorAvatar(
-                      initial: getFirstCharacter(conversation.name ?? "U"),
-                    ),
-                    title: Text(conversation.name ?? "Unknown"),
-                    subtitle: Text(
-                      conversation.message,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: Text(
-                      DateFormat('MMM d, yyyy – h:mm a')
-                          .format(conversation.sentAt.toLocal()),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                    ),
+                  return ConversationTile(
+                    message: conversation,
                     onTap: () async {
                       final senderNumber =
                           await SharedPreferenceService().getUser();
@@ -134,39 +84,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
               );
             }
           },
-        ),
-      ),
-    );
-  }
-}
-
-Color getRandomColor() {
-  final random = e.Random();
-  return Color.fromARGB(
-    255,
-    random.nextInt(256),
-    random.nextInt(256),
-    random.nextInt(256),
-  );
-}
-
-class RandomColorAvatar extends StatelessWidget {
-  final String initial;
-
-  const RandomColorAvatar({required this.initial, super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final backgroundColor = getRandomColor(); // Generate a random color
-
-    return CircleAvatar(
-      backgroundColor: backgroundColor,
-      child: Text(
-        initial.toUpperCase(),
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
         ),
       ),
     );

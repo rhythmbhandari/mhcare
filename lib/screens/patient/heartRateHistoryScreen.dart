@@ -1,11 +1,8 @@
-import 'dart:developer';
-
+import 'package:david/services/patientService.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../../models/heartMeasurement.dart';
 import '../../services/databaseService.dart';
+import '../../widgets/measurementCard.dart';
 
 class HeartMeasurementsScreen extends StatefulWidget {
   const HeartMeasurementsScreen({super.key});
@@ -16,11 +13,13 @@ class HeartMeasurementsScreen extends StatefulWidget {
 
 class HeartMeasurementsScreenState extends State<HeartMeasurementsScreen> {
   late Future<List<HeartMeasurement>> _measurementsFuture;
+  final PatientService _heartMeasurementService = PatientService();
 
   @override
   void initState() {
     super.initState();
-    _measurementsFuture = _fetchMeasurements();
+    _fetchMeasurements;
+    _refreshMeasurements();
   }
 
   Future<List<HeartMeasurement>> _fetchMeasurements() async {
@@ -28,18 +27,7 @@ class HeartMeasurementsScreenState extends State<HeartMeasurementsScreen> {
     if (patient == null) {
       throw Exception('User not found');
     }
-    final response = await Supabase.instance.client
-        .from('heartratemeasurements')
-        .select('*')
-        .eq('patient_id', patient.idNumber)
-        .order('recorded_at', ascending: false);
-
-    log(response.toString());
-
-    final List<Map<String, dynamic>> data =
-        List<Map<String, dynamic>>.from(response as List<dynamic>);
-
-    return data.map((map) => HeartMeasurement.fromMap(map)).toList();
+    return await _heartMeasurementService.fetchMeasurements(patient.idNumber);
   }
 
   Future<void> _refreshMeasurements() async {
@@ -57,7 +45,7 @@ class HeartMeasurementsScreenState extends State<HeartMeasurementsScreen> {
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             onPressed: _refreshMeasurements,
           ),
         ],
@@ -66,12 +54,13 @@ class HeartMeasurementsScreenState extends State<HeartMeasurementsScreen> {
         future: _measurementsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(
-                child: Text('Error fetching measurements. ${snapshot.error}'));
+              child: Text('Error fetching measurements: ${snapshot.error}'),
+            );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No measurements available.'));
+            return const Center(child: Text('No measurements available.'));
           } else {
             final measurements = snapshot.data!;
             return RefreshIndicator(
@@ -81,50 +70,7 @@ class HeartMeasurementsScreenState extends State<HeartMeasurementsScreen> {
                 itemCount: measurements.length,
                 itemBuilder: (context, index) {
                   final measurement = measurements[index];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 16.0),
-                    elevation: 3.0,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Icon(Icons.favorite, color: Colors.red),
-                              Text(
-                                DateFormat('MMM d, yyyy – h:mm a')
-                                    .format(measurement.recordedAt.toLocal()),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 8.0),
-                          Text(
-                            'Average BPM: ${measurement.averageBpm.toStringAsFixed(1)}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 4.0),
-                          Text(
-                            'Max BPM: ${measurement.maxBpm.toStringAsFixed(1)}',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                          SizedBox(height: 4.0),
-                          Text(
-                            'Min BPM: ${measurement.minBpm.toStringAsFixed(1)}',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
+                  return MeasurementCard(measurement: measurement);
                 },
               ),
             );
