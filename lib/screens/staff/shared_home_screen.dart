@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'staff/addDiagnosisScreen.dart';
-import 'staff/addPatientScreen.dart';
-import 'staff/patientListScreen.dart';
-import 'staff/profileScreen.dart';
+import 'addDiagnosisScreen.dart';
+import 'addPatientScreen.dart';
+import 'patientListScreen.dart';
+import 'profileScreen.dart';
 
 class SharedHomeScreen extends StatefulWidget {
   @override

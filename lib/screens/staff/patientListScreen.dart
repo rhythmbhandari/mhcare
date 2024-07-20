@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Ensure you import this
-
 import '../../services/databaseService.dart';
 import 'patientDetailScreen.dart';
 import 'addDiagnosisScreen.dart';
-import 'sendMessageScreen.dart'; // Import the SendMessageScreen
+import 'sendMessageScreen.dart';
 
 class PatientListScreen extends StatefulWidget {
+  const PatientListScreen({super.key});
+
   @override
-  _PatientListScreenState createState() => _PatientListScreenState();
+  PatientListScreenState createState() => PatientListScreenState();
 }
 
-class _PatientListScreenState extends State<PatientListScreen> {
+class PatientListScreenState extends State<PatientListScreen> {
   late Future<List<Map<String, dynamic>>> _patientsFuture;
 
   @override

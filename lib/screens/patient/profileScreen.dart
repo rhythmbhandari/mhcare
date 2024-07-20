@@ -1,12 +1,36 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
-import '../../models/user.dart';
-import '../../services/databaseService.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../models/patient.dart';
 import '../../services/authService.dart';
-import '../../utils/string_utils.dart'; // Assuming you have an auth service for logout
+import '../../services/databaseService.dart';
+import '../../utils/string_utils.dart';
 
-class UserInfoScreen extends StatelessWidget {
-  Future<UserModel?> _fetchUser() async {
-    return await SharedPreferenceService().getUser();
+class PersonalInformationScreen extends StatelessWidget {
+  const PersonalInformationScreen({super.key});
+
+  Future<PatientModel?> _fetchUser() async {
+    final user = await SharedPreferenceService().getUser();
+    if (user == null) {
+      throw Exception('User not found');
+    }
+
+    final response = await Supabase.instance.client
+        .from('patients')
+        .select()
+        .eq('patient_number', user.idNumber)
+        .single();
+    final Map<String, dynamic> data = response;
+
+    final result = PatientModel.fromJson({
+      'id_number': user.idNumber,
+      'password_hash': user.passwordHash,
+      'role': user.role,
+      'name': user.name,
+      'address': data['address'],
+      'date_of_birth': data['date_of_birth'],
+    });
+    return result;
   }
 
   Future<void> _logout(BuildContext context) async {
@@ -22,9 +46,10 @@ class UserInfoScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Profile'),
         foregroundColor: Colors.white,
-        backgroundColor: Colors.teal,
+        backgroundColor:
+            Colors.blueGrey[800], // Updated color for professionalism
       ),
-      body: FutureBuilder<UserModel?>(
+      body: FutureBuilder<PatientModel?>(
         future: _fetchUser(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -40,17 +65,18 @@ class UserInfoScreen extends StatelessWidget {
 
             return Center(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(32.0),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     CircleAvatar(
                       radius: 50,
-                      backgroundColor: Colors.teal,
+                      backgroundColor: Colors
+                          .blueGrey[200], // Updated color for professionalism
                       child: Text(
                         avatarText.toUpperCase(),
-                        style: TextStyle(color: Colors.white, fontSize: 36),
+                        style: TextStyle(
+                            color: Colors.blueGrey[800], fontSize: 36),
                       ),
                     ),
                     SizedBox(height: 16),
@@ -59,7 +85,8 @@ class UserInfoScreen extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 24,
-                        color: Colors.teal,
+                        color: Colors
+                            .blueGrey[800], // Updated color for professionalism
                       ),
                     ),
                     SizedBox(height: 8),
@@ -67,7 +94,8 @@ class UserInfoScreen extends StatelessWidget {
                       user.name ?? 'No name',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.teal[700],
+                        color: Colors
+                            .blueGrey[600], // Updated color for professionalism
                       ),
                     ),
                     SizedBox(height: 8),
@@ -75,7 +103,26 @@ class UserInfoScreen extends StatelessWidget {
                       'Role: ${capitalizeFirstLetter(user.role)}',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.teal[700],
+                        color: Colors
+                            .blueGrey[600], // Updated color for professionalism
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'Address: ${user.address ?? 'No address'}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors
+                            .blueGrey[600], // Updated color for professionalism
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Date of Birth: ${user.dateOfBirth}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors
+                            .blueGrey[600], // Updated color for professionalism
                       ),
                     ),
                     SizedBox(height: 24),
@@ -83,8 +130,6 @@ class UserInfoScreen extends StatelessWidget {
                       onPressed: () => _logout(context),
                       child: Text('Logout'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal, // Background color
-                        foregroundColor: Colors.white, // Text color
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),

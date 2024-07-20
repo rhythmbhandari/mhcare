@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'screens/loginScreen.dart';
-import 'screens/patientHomeScreen.dart';
-import 'screens/registerStaffScreen.dart';
-import 'screens/shared_home_screen.dart';
+import 'screens/authentication/loginScreen.dart';
+import 'screens/patient/patientHomeScreen.dart';
+import 'screens/authentication/registerStaffScreen.dart';
+import 'screens/staff/shared_home_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
@@ -32,8 +32,9 @@ class MHCareApp extends StatelessWidget {
           color: Colors.teal, // Customize AppBar color
         ),
       ),
-      home: LoginScreen(),
+      initialRoute: '/',
       routes: {
+        '/': (context) => LoginScreen(),
         '/shared_home': (context) => SharedHomeScreen(),
         '/register': (context) => RegistrationPage(),
         '/patient_home': (context) => PatientHomeScreen(),

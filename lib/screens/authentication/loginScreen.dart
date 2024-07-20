@@ -6,8 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bcrypt/bcrypt.dart';
 
-import '../models/user.dart';
-import '../services/databaseService.dart';
+import '../../models/user.dart';
+import '../../services/databaseService.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -123,6 +123,8 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Login'),
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.teal,
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())

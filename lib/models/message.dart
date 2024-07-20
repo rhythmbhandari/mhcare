@@ -3,10 +3,12 @@ class Message {
   final String senderNumber;
   final String receiverNumber;
   final String message;
+  final String? name;
   final DateTime sentAt;
 
   Message({
     this.id,
+    this.name,
     required this.senderNumber,
     required this.receiverNumber,
     required this.message,
@@ -17,6 +19,7 @@ class Message {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'name': name,
       'sender_number': senderNumber,
       'receiver_number': receiverNumber,
       'message': message,
@@ -28,6 +31,7 @@ class Message {
   factory Message.fromMap(Map<String, dynamic> map) {
     return Message(
       id: map['id'],
+      name: map['user']['name'],
       senderNumber: map['sender_number'],
       receiverNumber: map['receiver_number'],
       message: map['message'],
