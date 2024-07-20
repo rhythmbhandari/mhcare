@@ -1,19 +1,14 @@
 import 'dart:developer';
 import 'dart:math' as e;
 
-import 'package:david/screens/staff/sendMessageScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:uuid/uuid.dart';
+
 import '../../models/message.dart';
 import '../../services/databaseService.dart';
-
-import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../models/user.dart';
-import '../../services/databaseService.dart';
 import '../../utils/string_utils.dart';
+import '../staff/sendMessageScreen.dart';
 
 class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
@@ -62,6 +57,12 @@ class _MessagesScreenState extends State<MessagesScreen> {
     return latestMessages.values.toList();
   }
 
+  Future<void> _refreshConversations() async {
+    setState(() {
+      _conversationsFuture = _fetchConversations();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,66 +71,70 @@ class _MessagesScreenState extends State<MessagesScreen> {
         backgroundColor: Colors.blueGrey[800],
         foregroundColor: Colors.white,
       ),
-      body: FutureBuilder<List<Message>>(
-        future: _conversationsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(
-                child: Text('Error fetching conversations. ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No conversations available.'));
-          } else {
-            final conversations = snapshot.data!;
-            return ListView.separated(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: conversations.length,
-              separatorBuilder: (context, index) =>
-                  Divider(height: 32, color: Colors.grey[300]),
-              itemBuilder: (context, index) {
-                final conversation = conversations[index];
-                return ListTile(
-                  leading: RandomColorAvatar(
-                    initial: getFirstCharacter(conversation.name ?? "U"),
-                  ),
-                  title: Text(conversation.name ?? "Unknown"),
-                  subtitle: Text(
-                    conversation.message,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: Text(
-                    DateFormat('MMM d, yyyy – h:mm a')
-                        .format(conversation.sentAt.toLocal()),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
+      body: RefreshIndicator(
+        onRefresh: _refreshConversations,
+        child: FutureBuilder<List<Message>>(
+          future: _conversationsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  'Error fetching conversations. ${snapshot.error}',
+                  style: TextStyle(color: Colors.red[700]),
+                ),
+              );
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Center(child: Text('No conversations available.'));
+            } else {
+              final conversations = snapshot.data!;
+              return ListView.separated(
+                padding: const EdgeInsets.all(16.0),
+                itemCount: conversations.length,
+                separatorBuilder: (context, index) =>
+                    Divider(height: 32, color: Colors.grey[300]),
+                itemBuilder: (context, index) {
+                  final conversation = conversations[index];
+                  return ListTile(
+                    leading: RandomColorAvatar(
+                      initial: getFirstCharacter(conversation.name ?? "U"),
                     ),
-                  ),
-                  onTap: () async {
-                    final senderNumber =
-                        await SharedPreferenceService().getUser();
-                    log(conversation.senderNumber);
-                    log(conversation.name ?? "Unknown");
-                    log(senderNumber?.idNumber ?? "Unknown ID");
-                    if (senderNumber != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChatScreen(
-                            patientNumber: conversation.senderNumber,
-                            patientName: conversation.name ?? "Unknown",
-                            senderNumber: senderNumber.idNumber,
+                    title: Text(conversation.name ?? "Unknown"),
+                    subtitle: Text(
+                      conversation.message,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: Text(
+                      DateFormat('MMM d, yyyy – h:mm a')
+                          .format(conversation.sentAt.toLocal()),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    onTap: () async {
+                      final senderNumber =
+                          await SharedPreferenceService().getUser();
+                      if (senderNumber != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatScreen(
+                              patientNumber: conversation.senderNumber,
+                              patientName: conversation.name ?? "Unknown",
+                              senderNumber: senderNumber.idNumber,
+                            ),
                           ),
-                        ),
-                      );
-                    }
-                  },
-                );
-              },
-            );
-          }
-        },
+                        );
+                      }
+                    },
+                  );
+                },
+              );
+            }
+          },
+        ),
       ),
     );
   }

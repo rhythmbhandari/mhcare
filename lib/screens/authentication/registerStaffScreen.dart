@@ -1,18 +1,22 @@
-import 'dart:developer';
-
+import 'package:david/services/authService.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:bcrypt/bcrypt.dart';
+import '../../widgets/buttonwidget.dart';
+import '../../widgets/customtextfield.dart';
 
 class RegistrationPage extends StatefulWidget {
+  const RegistrationPage({super.key});
+
   @override
-  _RegistrationPageState createState() => _RegistrationPageState();
+  RegistrationPageState createState() => RegistrationPageState();
 }
 
-class _RegistrationPageState extends State<RegistrationPage> {
+class RegistrationPageState extends State<RegistrationPage> {
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
   String _selectedRole = 'Doctor';
+  bool _loading = false;
+
+  final AuthService _authService = AuthService();
 
   @override
   void dispose() {
@@ -22,61 +26,105 @@ class _RegistrationPageState extends State<RegistrationPage> {
   }
 
   Future<void> _register() async {
-    final password = _passwordController.text.trim();
+    setState(() {
+      _loading = true;
+    });
+
     final name = _nameController.text.trim();
+    final password = _passwordController.text.trim();
 
     if (password.isEmpty || name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Please fill all fields'),
         backgroundColor: Colors.red,
       ));
+      setState(() {
+        _loading = false;
+      });
       return;
     }
 
-    final hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-
     try {
-      await Supabase.instance.client.from('users').insert({
-        'password_hash': hashedPassword,
-        'name': name,
-        'role': _selectedRole.toLowerCase(),
-      });
-
+      await _authService.register(
+        name: name,
+        password: password,
+        role: _selectedRole,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Registration successful!'),
+        backgroundColor: Colors.green,
+      ));
       Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Registration failed: ${e.toString()}'),
+        content: Text(e.toString()),
         backgroundColor: Colors.red,
       ));
+    } finally {
+      setState(() {
+        _loading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Register Staff'),
-        foregroundColor: Colors.white,
-        backgroundColor: Colors.teal,
+        title: const Text(''),
+        foregroundColor: Colors.black,
+        backgroundColor: Colors.white,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(label: Text('Name')),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _passwordController,
-              decoration: const InputDecoration(label: Text('Password')),
-              obscureText: true,
-            ),
-            const SizedBox(height: 16),
-            Row(
+      body: SingleChildScrollView(
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 18),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
+                const Text('Register',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    )),
+                const SizedBox(height: 18),
+                const Text(
+                  'Please enter your details',
+                ),
+                const SizedBox(height: 18),
+                CustomTextFormField(
+                  labelText: 'Name',
+                  enabled: true,
+                  readOnly: false,
+                  onChanged: (_) {},
+                  textInputType: TextInputType.text,
+                  inputFormatters: const [],
+                  textController: _nameController,
+                ),
+                const SizedBox(height: 18),
+                CustomTextFormField(
+                  labelText: 'Password',
+                  errorBool: false,
+                  readOnly: false,
+                  obscureText: true,
+                  onChanged: (_) {},
+                  textInputType: TextInputType.text,
+                  inputFormatters: [],
+                  textController: _passwordController,
+                ),
+                const SizedBox(height: 18),
+                Container(
+                  padding: const EdgeInsets.only(left: 16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16.0),
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: 1,
+                    ),
+                  ),
                   child: DropdownButton<String>(
                     value: _selectedRole,
                     onChanged: (String? newValue) {
@@ -84,23 +132,37 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         _selectedRole = newValue!;
                       });
                     },
+                    underline: const SizedBox(),
+                    isExpanded: true,
                     items: <String>['Doctor', 'Receptionist']
                         .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
-                        child: Text(value),
+                        child: Text(
+                          value,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.copyWith(color: Colors.black87),
+                        ),
                       );
                     }).toList(),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyLarge
+                        ?.copyWith(color: Colors.black87),
+                    dropdownColor: Colors.white,
                   ),
-                )
+                ),
+                const SizedBox(height: 18),
+                ButtonsWidget(
+                  name: 'Register',
+                  onPressed: _register,
+                  isLoading: _loading,
+                ),
               ],
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _register,
-              child: const Text('Register'),
-            ),
-          ],
+          ),
         ),
       ),
     );

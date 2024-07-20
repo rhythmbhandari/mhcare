@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/authentication/loginScreen.dart';
+import 'screens/patient/heartRateHistoryScreen.dart';
 import 'screens/patient/patientHomeScreen.dart';
 import 'screens/authentication/registerStaffScreen.dart';
 import 'screens/staff/shared_home_screen.dart';
@@ -38,6 +39,7 @@ class MHCareApp extends StatelessWidget {
         '/shared_home': (context) => SharedHomeScreen(),
         '/register': (context) => RegistrationPage(),
         '/patient_home': (context) => PatientHomeScreen(),
+        '/measurement_history': (context) => HeartMeasurementsScreen(),
       },
     );
   }

@@ -1,3 +1,4 @@
+import 'package:david/screens/patient/heartRate.dart';
 import 'package:flutter/material.dart';
 
 import 'diagnosisScreen.dart';
@@ -17,6 +18,7 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
   final List<Widget> _screens = [
     DiagnosisScreen(),
     MessagesScreen(), // Placeholder
+    HeartRateScreen(),
     PersonalInformationScreen(),
   ];
 
@@ -39,6 +41,10 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
             label: 'Messages',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Heart Rate',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

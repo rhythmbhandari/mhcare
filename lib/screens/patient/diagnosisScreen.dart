@@ -51,115 +51,128 @@ class _DiagnosisScreenState extends State<DiagnosisScreen> {
     }).toList();
   }
 
+  Future<void> _refreshDiagnoses() async {
+    setState(() {
+      _diagnosesFuture = _fetchDiagnoses();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Diagnoses'),
-        backgroundColor: Colors.blueGrey[800], // Updated color
+        backgroundColor: Colors.blueGrey[800],
         foregroundColor: Colors.white,
       ),
-      body: FutureBuilder<List<Diagnosis>>(
-        future: _diagnosesFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(
-                child: Text('Error fetching diagnoses. Please try again later.',
-                    style: TextStyle(color: Colors.red[700])));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No diagnoses available at this time.'));
-          } else {
-            final diagnoses = snapshot.data!;
-            return ListView.separated(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: diagnoses.length,
-              separatorBuilder: (context, index) =>
-                  Divider(height: 32, color: Colors.grey[300]),
-              itemBuilder: (context, index) {
-                final diagnosis = diagnoses[index];
-                return Container(
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white, // Updated color for minimalistic look
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.shade200,
-                        offset: Offset(0, 4),
-                        blurRadius: 8,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: Colors.blueGrey[100], // Updated color
-                        child: Text(
-                          diagnosis.doctorName.isNotEmpty
-                              ? diagnosis.doctorName[0]
-                              : 'D',
-                          style: TextStyle(
-                            color: Colors.blueGrey[800], // Updated color
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+      body: RefreshIndicator(
+        onRefresh: _refreshDiagnoses,
+        child: FutureBuilder<List<Diagnosis>>(
+          future: _diagnosesFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  'Error fetching diagnoses. Please try again later.',
+                  style: TextStyle(color: Colors.red[700]),
+                ),
+              );
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Center(
+                  child: Text('No diagnoses available at this time.'));
+            } else {
+              final diagnoses = snapshot.data!;
+              return ListView.separated(
+                padding: const EdgeInsets.all(16.0),
+                itemCount: diagnoses.length,
+                separatorBuilder: (context, index) =>
+                    Divider(height: 32, color: Colors.grey[300]),
+                itemBuilder: (context, index) {
+                  final diagnosis = diagnoses[index];
+                  return Container(
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.shade200,
+                          offset: Offset(0, 4),
+                          blurRadius: 8,
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundColor: Colors.blueGrey[100],
+                          child: Text(
+                            diagnosis.doctorName.isNotEmpty
+                                ? diagnosis.doctorName[0]
+                                : 'D',
+                            style: TextStyle(
+                              color: Colors.blueGrey[800],
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              diagnosis.diagnosis,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                color: Colors.blueGrey[800], // Updated color
-                              ),
-                            ),
-                            if (diagnosis.desc != null &&
-                                diagnosis.desc!.isNotEmpty)
-                              SizedBox(height: 8),
-                            if (diagnosis.desc != null &&
-                                diagnosis.desc!.isNotEmpty)
+                        SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                               Text(
-                                diagnosis.desc!,
+                                diagnosis.diagnosis,
                                 style: TextStyle(
-                                  fontSize: 16,
-                                  fontStyle: FontStyle.italic,
-                                  color: Colors.blueGrey[600], // Updated color
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  color: Colors.blueGrey[800],
                                 ),
                               ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Doctor: ${diagnosis.doctorName}',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.blueGrey[600], // Updated color
+                              if (diagnosis.desc != null &&
+                                  diagnosis.desc!.isNotEmpty)
+                                SizedBox(height: 8),
+                              if (diagnosis.desc != null &&
+                                  diagnosis.desc!.isNotEmpty)
+                                Text(
+                                  diagnosis.desc!,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontStyle: FontStyle.italic,
+                                    color: Colors.blueGrey[600],
+                                  ),
+                                ),
+                              SizedBox(height: 8),
+                              Text(
+                                'Doctor: ${diagnosis.doctorName}',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.blueGrey[600],
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Date: ${DateFormat('MMMM d, yyyy – h:mm a').format(diagnosis.diagnosisDate.toLocal())}',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.blueGrey[500], // Updated color
+                              SizedBox(height: 4),
+                              Text(
+                                'Date: ${DateFormat('MMMM d, yyyy – h:mm a').format(diagnosis.diagnosisDate.toLocal())}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.blueGrey[500],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
-          }
-        },
+                      ],
+                    ),
+                  );
+                },
+              );
+            }
+          },
+        ),
       ),
     );
   }

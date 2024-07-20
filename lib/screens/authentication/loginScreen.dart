@@ -1,23 +1,21 @@
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:bcrypt/bcrypt.dart';
-
-import '../../models/user.dart';
-import '../../services/databaseService.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
+import '../../services/authService.dart';
+import '../../widgets/buttonwidget.dart';
+import '../../widgets/customtextfield.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  LoginScreenState createState() => LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class LoginScreenState extends State<LoginScreen> {
   bool _loading = false;
   final _idNumberController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  final AuthService _authService = AuthService();
 
   @override
   void dispose() {
@@ -35,10 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text.trim();
 
     if (password.isEmpty || idNumber.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Please fill all fields'),
-        backgroundColor: Colors.red,
-      ));
+      _showSnackBar('Please fill all fields', Colors.red);
       setState(() {
         _loading = false;
       });
@@ -46,32 +41,10 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     try {
-      final response = await Supabase.instance.client
-          .from('users')
-          .select()
-          .eq('id_number', idNumber)
-          .maybeSingle();
+      final user =
+          await _authService.login(idNumber: idNumber, password: password);
 
-      if (response == null) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('User does not exist'),
-          backgroundColor: Colors.red,
-        ));
-        setState(() {
-          _loading = false;
-        });
-        return;
-      }
-
-      final user = UserModel.fromJson(response);
-
-      final storedPasswordHash = user.passwordHash;
-
-      log("Here");
-      log(response.toString());
-      if (BCrypt.checkpw(password, storedPasswordHash)) {
-        SharedPreferenceService().saveUser(user);
-
+      if (user != null) {
         String routeName;
 
         switch (user.role) {
@@ -83,10 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
             routeName = '/patient_home';
             break;
           default:
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('Unknown user role'),
-              backgroundColor: Colors.red,
-            ));
+            _showSnackBar('Unknown user role', Colors.red);
             setState(() {
               _loading = false;
             });
@@ -94,23 +64,9 @@ class _LoginScreenState extends State<LoginScreen> {
         }
 
         Navigator.pushReplacementNamed(context, routeName);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Invalid password'),
-          backgroundColor: Colors.red,
-        ));
       }
-    } on AuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Login failed: ${e.message}'),
-        backgroundColor: Colors.red,
-      ));
     } catch (e) {
-      log(e.toString());
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('An unexpected error occurred'),
-        backgroundColor: Colors.red,
-      ));
+      _showSnackBar(e.toString(), Colors.red);
     } finally {
       setState(() {
         _loading = false;
@@ -118,45 +74,83 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      backgroundColor: color,
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
-        foregroundColor: Colors.white,
-        backgroundColor: Colors.teal,
-      ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  TextFormField(
-                    controller: _idNumberController,
-                    decoration: const InputDecoration(label: Text('Id Number')),
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 18),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: SvgPicture.asset(
+                    'assets/heart.svg',
+                    height: MediaQuery.of(context).size.height * 0.2,
                   ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(label: Text('Password')),
-                    obscureText: true,
+                ),
+                const SizedBox(height: 18),
+                const Text(
+                  'Login',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _login,
-                    child: const Text('Login'),
-                  ),
-                  const SizedBox(height: 16),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/register');
-                    },
-                    child: const Text('Register as Staff'),
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 18),
+                const Text('Please enter your credentials'),
+                const SizedBox(height: 18),
+                CustomTextFormField(
+                  labelText: 'ID Number',
+                  enabled: true,
+                  readOnly: false,
+                  onChanged: (_) {},
+                  textInputType: TextInputType.text,
+                  inputFormatters: [
+                    LengthLimitingTextInputFormatter(6),
+                    FilteringTextInputFormatter.allow(RegExp('[0-9]')),
+                  ],
+                  textController: _idNumberController,
+                ),
+                const SizedBox(height: 18),
+                CustomTextFormField(
+                  labelText: 'Password',
+                  errorBool: false,
+                  readOnly: false,
+                  obscureText: true,
+                  onChanged: (_) {},
+                  textInputType: TextInputType.text,
+                  inputFormatters: [],
+                  textController: _passwordController,
+                ),
+                const SizedBox(height: 18),
+                ButtonsWidget(
+                  name: 'Login',
+                  onPressed: _login,
+                  isLoading: _loading,
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/register');
+                  },
+                  child: const Text('Register as Staff'),
+                ),
+              ],
             ),
+          ),
+        ),
+      ),
     );
   }
 }

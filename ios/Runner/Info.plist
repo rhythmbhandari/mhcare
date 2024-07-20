@@ -14,6 +14,10 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>david</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera is required to measure your heart rate.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Microphone is required to measure your heart rate.</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
