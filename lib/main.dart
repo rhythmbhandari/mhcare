@@ -37,7 +37,7 @@ class MHCareApp extends StatelessWidget {
       initialRoute: '/', // Default route is LoginScreen
       routes: {
         '/': (context) => const LoginScreen(),
-        '/shared_home': (context) => SharedHomeScreen(),
+        '/shared_home': (context) => const SharedHomeScreen(),
         '/register': (context) => const RegistrationPage(),
         '/patient_home': (context) => const PatientHomeScreen(),
         '/measurement_history': (context) => const HeartMeasurementsScreen(),

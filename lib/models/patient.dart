@@ -1,7 +1,7 @@
 class PatientModel {
   final String idNumber;
   final String passwordHash;
-  final String role;
+  final String role; // Role of the patient (likely 'patient')
   final String name;
   final String? address;
   final String? dateOfBirth;
